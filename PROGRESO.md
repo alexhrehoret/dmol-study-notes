@@ -16,7 +16,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
     - [x] 2.3.2 Distribución de la solubilidad
     - [x] 2.3.3 Moléculas extremas
     - [x] 2.3.4 Correlación feature–label
-    - [ ] 2.3.5 Modelo lineal + descenso de gradiente (JAX) ← siguiente
+    - [x] 2.3.5 Modelo lineal + función de pérdida (MSE)
+    - [ ] 2.3.6 Descenso de gradiente con JAX ← siguiente
     - [ ] 2.3.6 Batching, estandarizado y parity plot
   - [ ] 2.4 Unsupervised Learning (clustering)
   - [ ] 2.5 Chapter Summary
@@ -59,4 +60,5 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 - Hechas 2.1 y 2.2 en `notebooks/02_introduccion.ipynb`: features (17 descriptores RDKit) vs label (Solubility).
 - Repo privado en GitHub: https://github.com/alexhrehoret/ML_Projects
 - Hecha la exploración de 2.3: RDKit, histograma de solubilidad (std=2.37, la vara de medir) y moléculas extremas.
+- 2.3.5: modelo lineal y MSE definidos (sin entrenar). Listón a batir: RMSE 2.37 (predecir la media).
 - 2.3.4: correlaciones. MolLogP r=-0.61 es la mejor feature (r2=0.37). Detectada multicolinealidad entre los 5 descriptores de tamaño y 400 BalabanJ=0 falsos (363 son sales).
