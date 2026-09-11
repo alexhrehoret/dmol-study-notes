@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Cap. 2, sección 2.3** · Actualizado: 2026-09-11
+Estado: **Capítulos 1 y 2 completos. Siguiente: capítulo 3** · Actualizado: 2026-09-11
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -8,7 +8,7 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 - [x] 1. Tensors and Shapes — `notebooks/01_tensores.ipynb`
 
 ## B. Machine Learning
-- [ ] 2. Introduction to Machine Learning — `notebooks/02_introduccion.ipynb`
+- [x] 2. Introduction to Machine Learning — `notebooks/02_introduccion.ipynb`
   - [x] 2.1 The Ingredients (ampliada: los 6 ingredientes y la notación)
   - [x] **2.2 Supervised Learning**
   - [x] 2.3 Running This Notebook
@@ -23,9 +23,9 @@ Marca `[x]` cuando una sección esté hecha y entendida.
     - [x] 2.3.9 Parity plot y rendimiento
 
   - [x] 2.4 Unsupervised Learning (clustering + PCA)
-  - [ ] 2.5 Chapter Summary ← siguiente
-  - [ ] 2.6 Exercises
-- [ ] 3. Regression & Model Assessment
+  - [x] 2.5 Chapter Summary
+  - [~] 2.6 Exercises — planteados sin resolver, pendientes de que los haga Gabriel
+- [ ] 3. Regression & Model Assessment ← siguiente
 - [ ] 4. Classification
 - [ ] 5. Kernel Learning
 
@@ -63,6 +63,7 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 - Hechas 2.1 y 2.2 en `notebooks/02_introduccion.ipynb`: features (17 descriptores RDKit) vs label (Solubility).
 - Repo privado en GitHub: https://github.com/alexhrehoret/ML_Projects
 - Hecha la exploración de 2.3: RDKit, histograma de solubilidad (std=2.37, la vara de medir) y moléculas extremas.
+- Cap. 2 cerrado con 2.5 (resumen + glosario) y 2.6 (10 ejercicios planteados sin resolver, en el notebook).
 - Cap. 1 completo (`01_tensores.ipynb`): rank/shape, einsum, broadcasting, matriz de distancias, newaxis/reshape/ellipsis, vista vs copia. Y 2.1 reescrita con los 6 ingredientes y la notación f vs f-gorro.
 - 2.4: k-means (k=4) da 4 grupos con identidad quimica clara. PCA: PC1=tamano (53.9%), PC2=polaridad (13.7%), confirma la multicolinealidad. PC2 explica 4x menos varianza pero correlaciona mejor con la solubilidad (-0.49 vs -0.29). No hay codo: el espacio quimico es continuo.
 - 2.3.9: parity plot. r2=0.51, RMSE 1.658. El modelo comprime el rango (regresion a la media) y falla sistematicamente en las colas. Descubiertas 573 mezclas (nombre con ';') con descriptores sumados: RMSE 2.31 vs 1.61 de los compuestos puros.
