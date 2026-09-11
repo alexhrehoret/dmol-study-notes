@@ -11,7 +11,7 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 - [ ] 2. Introduction to Machine Learning — `notebooks/02_introduccion.ipynb`
   - [x] 2.1 The Ingredients
   - [x] **2.2 Supervised Learning**
-  - [~] 2.3 Running This Notebook
+  - [x] 2.3 Running This Notebook
     - [x] 2.3.1 RDKit: de texto a molécula
     - [x] 2.3.2 Distribución de la solubilidad
     - [x] 2.3.3 Moléculas extremas
@@ -20,9 +20,9 @@ Marca `[x]` cuando una sección esté hecha y entendida.
     - [x] 2.3.6 Descenso de gradiente con JAX
     - [x] 2.3.7 Batching / SGD
     - [x] 2.3.8 Estandarizar features
-    - [ ] 2.3.9 Parity plot y rendimiento ← siguiente
+    - [x] 2.3.9 Parity plot y rendimiento
 
-  - [ ] 2.4 Unsupervised Learning (clustering)
+  - [ ] 2.4 Unsupervised Learning (clustering) ← siguiente
   - [ ] 2.5 Chapter Summary
   - [ ] 2.6 Exercises
 - [ ] 3. Regression & Model Assessment
@@ -63,6 +63,7 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 - Hechas 2.1 y 2.2 en `notebooks/02_introduccion.ipynb`: features (17 descriptores RDKit) vs label (Solubility).
 - Repo privado en GitHub: https://github.com/alexhrehoret/ML_Projects
 - Hecha la exploración de 2.3: RDKit, histograma de solubilidad (std=2.37, la vara de medir) y moléculas extremas.
+- 2.3.9: parity plot. r2=0.51, RMSE 1.658. El modelo comprime el rango (regresion a la media) y falla sistematicamente en las colas. Descubiertas 573 mezclas (nombre con ';') con descriptores sumados: RMSE 2.31 vs 1.61 de los compuestos puros.
 - 2.3.7 y 2.3.8: SGD (batch 32) y estandarizacion. Con features estandarizadas eta=0.1 llega a loss 2.747 / RMSE 1.658, casi el optimo exacto (2.708). Los pesos salen sin sentido quimico por multicolinealidad.
 - 2.3.6: descenso de gradiente. eta=1e-6 converge lento (loss 4.24, RMSE 2.06) y el bias no se mueve; eta=1e-5 diverge. Causa: escalas incompatibles entre features.
 - 2.3.5: modelo lineal y MSE definidos (sin entrenar). Listón a batir: RMSE 2.37 (predecir la media).
