@@ -11,7 +11,13 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 - [ ] 2. Introduction to Machine Learning — `notebooks/02_introduccion.ipynb`
   - [x] 2.1 The Ingredients
   - [x] **2.2 Supervised Learning**
-  - [ ] 2.3 Running This Notebook (exploración + modelo lineal + SGD) ← siguiente
+  - [~] 2.3 Running This Notebook
+    - [x] 2.3.1 RDKit: de texto a molécula
+    - [x] 2.3.2 Distribución de la solubilidad
+    - [x] 2.3.3 Moléculas extremas
+    - [ ] 2.3.4 Correlación feature–label ← siguiente
+    - [ ] 2.3.5 Modelo lineal + descenso de gradiente (JAX)
+    - [ ] 2.3.6 Batching, estandarizado y parity plot
   - [ ] 2.4 Unsupervised Learning (clustering)
   - [ ] 2.5 Chapter Summary
   - [ ] 2.6 Exercises
@@ -51,3 +57,5 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 - Montado el entorno conda `dmol` y la estructura del proyecto.
 - Descargado AqSolDB (`data/curated-solubility-dataset.csv`, 9982 compuestos).
 - Hechas 2.1 y 2.2 en `notebooks/02_introduccion.ipynb`: features (17 descriptores RDKit) vs label (Solubility).
+- Repo privado en GitHub: https://github.com/alexhrehoret/ML_Projects
+- Hecha la exploración de 2.3: RDKit, histograma de solubilidad (std=2.37, la vara de medir) y moléculas extremas.
