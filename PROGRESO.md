@@ -24,7 +24,7 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 
   - [x] 2.4 Unsupervised Learning (clustering + PCA)
   - [x] 2.5 Chapter Summary
-  - [~] 2.6 Exercises — planteados sin resolver, pendientes de que los haga Gabriel
+  - [x] 2.6 Exercises — enunciados en `02_introduccion.ipynb`, soluciones en `02_ejercicios_resueltos.ipynb`
 - [ ] 3. Regression & Model Assessment ← siguiente
 - [ ] 4. Classification
 - [ ] 5. Kernel Learning
@@ -63,6 +63,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 - Hechas 2.1 y 2.2 en `notebooks/02_introduccion.ipynb`: features (17 descriptores RDKit) vs label (Solubility).
 - Repo privado en GitHub: https://github.com/alexhrehoret/ML_Projects
 - Hecha la exploración de 2.3: RDKit, histograma de solubilidad (std=2.37, la vara de medir) y moléculas extremas.
+- Ejercicios del cap. 2 resueltos en `notebooks/02_ejercicios_resueltos.ipynb`. Hallazgos: estandarizar labels NO cambia el learning rate (el Hessiano del MSE solo depende de X; umbral teorico 2/lambda_max=0.1091, empirico entre 0.108 y 0.110); MAE gana en mediana (0.835 vs 0.983) y pierde en las colas; batch pequeno exige eta mas pequeno (bs=1 diverge con eta=0.01).
+- CORRECCION a 2.3.2: el 'hombro' del histograma NO se explica por mezcla de fuentes experimentales; todas las Group tienen distribuciones similares.
 - Cap. 2 cerrado con 2.5 (resumen + glosario) y 2.6 (10 ejercicios planteados sin resolver, en el notebook).
 - Cap. 1 completo (`01_tensores.ipynb`): rank/shape, einsum, broadcasting, matriz de distancias, newaxis/reshape/ellipsis, vista vs copia. Y 2.1 reescrita con los 6 ingredientes y la notación f vs f-gorro.
 - 2.4: k-means (k=4) da 4 grupos con identidad quimica clara. PCA: PC1=tamano (53.9%), PC2=polaridad (13.7%), confirma la multicolinealidad. PC2 explica 4x menos varianza pero correlaciona mejor con la solubilidad (-0.49 vs -0.29). No hay codo: el espacio quimico es continuo.
