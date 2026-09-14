@@ -24,6 +24,13 @@ source /opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh && conda act
 
 Kernel de Jupyter: `Python (dmol)`.
 
+Arranque: doble clic en `Abrir Jupyter.command`. Usa un *workspace* de Jupyter Lab llamado `dmol`
+que abre todos los notebooks en pestañas. Si añades un notebook nuevo y quieres que se abra solo:
+
+```bash
+python .jupyter/crear_workspace.py
+```
+
 ## Detalles que difieren del libro
 - El libro hace `import dmol` solo para aplicar su estilo de gráficas; no lo usamos.
 - El libro descarga el CSV por URL en cada celda; nosotros leemos `data/curated-solubility-dataset.csv`.
