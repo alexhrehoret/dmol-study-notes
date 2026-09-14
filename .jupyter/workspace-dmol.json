@@ -18,18 +18,25 @@
     "factory": "Notebook"
    }
   },
+  "notebook:notebooks/03_regresion.ipynb": {
+   "data": {
+    "path": "notebooks/03_regresion.ipynb",
+    "factory": "Notebook"
+   }
+  },
   "layout-restorer:data": {
    "main": {
     "dock": {
      "type": "tab-area",
-     "currentIndex": 1,
+     "currentIndex": 3,
      "widgets": [
       "notebook:notebooks/01_tensores.ipynb",
       "notebook:notebooks/02_introduccion.ipynb",
-      "notebook:notebooks/02_ejercicios_resueltos.ipynb"
+      "notebook:notebooks/02_ejercicios_resueltos.ipynb",
+      "notebook:notebooks/03_regresion.ipynb"
      ]
     },
-    "current": "notebook:notebooks/02_introduccion.ipynb"
+    "current": "notebook:notebooks/03_regresion.ipynb"
    },
    "down": {
     "size": 0,

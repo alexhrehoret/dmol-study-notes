@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1 y 2 completos. Siguiente: capítulo 3** · Actualizado: 2026-09-14
+Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.2.1)** · Actualizado: 2026-09-14
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -25,7 +25,19 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 2.4 Unsupervised Learning (clustering + PCA)
   - [x] 2.5 Chapter Summary
   - [x] 2.6 Exercises — enunciados en `02_introduccion.ipynb`, soluciones en `02_ejercicios_resueltos.ipynb`
-- [ ] 3. Regression & Model Assessment ← siguiente
+- [ ] 3. Regression & Model Assessment — `notebooks/03_regresion.ipynb`
+  - [x] 3.1 Running This Notebook (qué es regresión, esperanza/varianza, imports)
+  - [x] 3.2 Overfitting — introducción (25 train / 25 test con datos reales)
+  - [ ] 3.2.1 Overfitting with Synthetic Data ← siguiente
+  - [ ] 3.2.2 Overfitting Conclusion
+  - [ ] 3.3 Exploring Effect of Feature Number
+  - [ ] 3.4 Bias Variance Decomposition
+  - [ ] 3.5 Regularization (L2, L1)
+  - [ ] 3.6 Strategies to Assess Models (k-fold, LOOCV)
+  - [ ] 3.7 Computing Other Measures (bootstrap, jackknife+)
+  - [ ] 3.8 Training Data Distribution (leave-one-class-out, scaffold splits)
+  - [ ] 3.9 Chapter Summary
+  - [ ] 3.10 Exercises
 - [ ] 4. Classification
 - [ ] 5. Kernel Learning
 
@@ -110,22 +122,36 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 - Arreglado: la ampliación había quedado tras el ejercicio 4 porque la celda de cierre del 3
   llevaba pegado el enunciado del 4.
 
+### 2026-09-14 — Capítulo 3: 3.1 y la introducción de 3.2
+- Notebook nuevo `03_regresion.ipynb` (añadido al workspace). Semillas fijadas (`random_state=4`,
+  `default_rng(4)`); el libro no las fija.
+- **Experimento 25/25** (estandarizado con estadísticas solo del train): el test tiene su mínimo en
+  el **paso 28** y luego sube; al final la loss de test es **19×** la de train.
+  RMSE train 0.59 / test 2.60, frente a 2.85 de predecir la media en test (solo un 9 % mejor).
+- Predicciones imposibles en test: **rafinosa** +6.92 (real +0.30; 11 dadores de H frente a un máximo
+  de 4 en train) y un pigmento bis-azoico −15.20 (real −7.26).
+- *Variante propia*: las 10 moléculas de test con alguna feature fuera del rango del train dan
+  **RMSE 3.55 frente a 1.70** → gancho al dominio de aplicabilidad (3.8).
+- *Variante propia*: 8 semillas. Hay brecha en todas; 7/8 con mínimo temprano (la 1 no sobreajusta en
+  2000 pasos); en 3/8 el modelo final es peor que la media. RMSE de test entre 1.17 y 3.93 según el
+  sorteo → gancho a la validación cruzada (3.6).
+- Nota: `jax.example_libraries.optimizers` lo importa el libro pero no lo usa; omitido.
+
 ---
 
 ## Punto de partida de la próxima sesión
 
-**Capítulo 3 — Regression & Model Assessment** (https://dmol.pub/ml/regression.html),
-en un `notebooks/03_regresion.ipynb` nuevo.
+**3.2.1 Overfitting with Synthetic Data** en `notebooks/03_regresion.ipynb` (añadir celdas tras el
+resumen de 3.2, que es la última celda).
 
-Es el capítulo que cierra el agujero que dejamos abierto: **todo el RMSE = 1.658 del capítulo 2
-está medido sobre los mismos datos con los que se entrenó**. Ahí se ven train/test split,
-overfitting y validación cruzada.
+El libro usa $f(x) = x^3 - x^2 + x - 1$ con 20 puntos: train = los extremos, test = el centro, y
+ajusta con `np.linalg.lstsq` en 4 escenarios (sin ruido / ruido con features perfectas / ruido con
+features de más $x^0..x^6$ / features mal correlacionadas). Semillas a fijar: el ruido
+`np.random.normal(scale=5)`.
 
-Ganchos ya preparados en el capítulo 2 que conviene retomar:
-- El aviso de **data leakage** de 2.3.8: hay que calcular media y desviación **solo con train**.
-- El **ejercicio 10**: las fuentes `Group` tienen sesgos → el split por grupos es más honesto
-  que el aleatorio.
-- El **error irreducible**: las 573 mezclas y las medidas dudosas ponen un suelo al RMSE.
-- El **techo del modelo lineal**: 1.65. Para bajar de ahí hay que cambiar de modelo o de features.
-
-Al crear el notebook, ejecutar `python .jupyter/crear_workspace.py` para que entre en las pestañas.
+Ganchos que siguen abiertos para el resto del capítulo:
+- **El RMSE = 1.658 del capítulo 2 sigue sin medirse en test** → 3.6 (k-fold).
+- **Ejercicio 10**: sesgos por `Group` → leave-one-class-out (3.8.1).
+- **Extrapolación / rafinosa** → dominio de aplicabilidad y scaffold splits (3.8).
+- **Multicolinealidad** del capítulo 2 → regularización L2/L1 (3.5).
+- Early stopping mencionado; el conjunto de validación aún no se ha tratado en detalle.
