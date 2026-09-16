@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.2.1)** · Actualizado: 2026-09-14
+Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.3)** · Actualizado: 2026-09-16
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -28,9 +28,9 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 - [ ] 3. Regression & Model Assessment — `notebooks/03_regresion.ipynb`
   - [x] 3.1 Running This Notebook (qué es regresión, esperanza/varianza, imports)
   - [x] 3.2 Overfitting — introducción (25 train / 25 test con datos reales)
-  - [ ] 3.2.1 Overfitting with Synthetic Data ← siguiente
-  - [ ] 3.2.2 Overfitting Conclusion
-  - [ ] 3.3 Exploring Effect of Feature Number
+  - [x] 3.2.1 Overfitting with Synthetic Data (4 escenarios + controles sin ruido + 10 semillas)
+  - [x] 3.2.2 Overfitting Conclusion
+  - [ ] 3.3 Exploring Effect of Feature Number ← siguiente
   - [ ] 3.4 Bias Variance Decomposition
   - [ ] 3.5 Regularization (L2, L1)
   - [ ] 3.6 Strategies to Assess Models (k-fold, LOOCV)
@@ -137,21 +137,34 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
   sorteo → gancho a la validación cruzada (3.6).
 - Nota: `jax.example_libraries.optimizers` lo importa el libro pero no lo usa; omitido.
 
+### 2026-09-16 — Capítulo 3: 3.2.1 y 3.2.2 (overfitting con datos sintéticos)
+- $f(x) = x^3 - x^2 + x - 1$, 20 puntos; train = 10 de los extremos, test = 10 del centro (sin ruido).
+  Ajuste con `np.linalg.lstsq` (mínimo exacto, sin pasos). Ruido `default_rng(4).normal(scale=5)`.
+  Eje Y en (−50, 30) en vez de (−40, 40) para que no se corte el punto de train de −43.3.
+- Loss train / test (semilla 4): sin ruido 0 / 0 · ruido 21.49 / **1.96** · ruido + $x^0..x^6$
+  4.56 / **3537** · ruido + $[x^2, x, e^{-x^2}, \cos x, 1]$ 44.67 / **50 206**.
+- Escenario 4: peso **−413** en $e^{-x^2}$, que en train vale ≤ 0.049 y en test hasta 0.98. Se usa
+  para aprender ruido → misma historia que la rafinosa (feature fuera del rango del train).
+- *Variante propia (controles sin ruido)*: features de más sin ruido → 0 / 0 y pesos exactos
+  (overfitting = ruido + flexibilidad). Features malas sin ruido → 24.5 / 21.9: **underfitting / sesgo**
+  (gancho a 3.4). Responde a la duda del libro: en el escenario 4 hay las dos cosas.
+- *Variante propia (10 semillas)*: features de más peor que las exactas en 10/10 (×6.7 a ×10 850).
+  Escenario 2 test entre 0.24 y 118.8; test < train solo en 5/10. Train medio 16.8 (4 params) y
+  7.6 (7 params), bajo la varianza del ruido (25).
+- Nota: este bloque reutiliza `w`, `test_x`, `test_y` (como el libro); reejecutar de arriba abajo.
+
 ---
 
 ## Punto de partida de la próxima sesión
 
-**3.2.1 Overfitting with Synthetic Data** en `notebooks/03_regresion.ipynb` (añadir celdas tras el
-resumen de 3.2, que es la última celda).
-
-El libro usa $f(x) = x^3 - x^2 + x - 1$ con 20 puntos: train = los extremos, test = el centro, y
-ajusta con `np.linalg.lstsq` en 4 escenarios (sin ruido / ruido con features perfectas / ruido con
-features de más $x^0..x^6$ / features mal correlacionadas). Semillas a fijar: el ruido
-`np.random.normal(scale=5)`.
+**3.3 Exploring Effect of Feature Number** en `notebooks/03_regresion.ipynb` (añadir celdas tras el
+resumen de 3.2.1–3.2.2, que es la última celda). El libro va añadiendo features una a una y mide
+cómo cambian las pérdidas de train y de test.
 
 Ganchos que siguen abiertos para el resto del capítulo:
 - **El RMSE = 1.658 del capítulo 2 sigue sin medirse en test** → 3.6 (k-fold).
 - **Ejercicio 10**: sesgos por `Group` → leave-one-class-out (3.8.1).
 - **Extrapolación / rafinosa** → dominio de aplicabilidad y scaffold splits (3.8).
 - **Multicolinealidad** del capítulo 2 → regularización L2/L1 (3.5).
+- **Underfitting / sesgo** visto en los controles de 3.2.1 → 3.4.
 - Early stopping mencionado; el conjunto de validación aún no se ha tratado en detalle.
