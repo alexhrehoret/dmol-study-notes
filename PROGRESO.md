@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.3)** · Actualizado: 2026-09-16
+Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.4)** · Actualizado: 2026-09-16
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -30,8 +30,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 3.2 Overfitting — introducción (25 train / 25 test con datos reales)
   - [x] 3.2.1 Overfitting with Synthetic Data (4 escenarios + controles sin ruido + 10 semillas)
   - [x] 3.2.2 Overfitting Conclusion
-  - [ ] 3.3 Exploring Effect of Feature Number ← siguiente
-  - [ ] 3.4 Bias Variance Decomposition
+  - [x] 3.3 Exploring Effect of Feature Number (libro + variante con descriptores RDKit)
+  - [ ] 3.4 Bias Variance Decomposition ← siguiente
   - [ ] 3.5 Regularization (L2, L1)
   - [ ] 3.6 Strategies to Assess Models (k-fold, LOOCV)
   - [ ] 3.7 Computing Other Measures (bootstrap, jackknife+)
@@ -153,18 +153,36 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
   7.6 (7 params), bajo la varianza del ruido (25).
 - Nota: este bloque reutiliza `w`, `test_x`, `test_y` (como el libro); reejecutar de arriba abajo.
 
+### 2026-09-16 — Capítulo 3: 3.3 (efecto del número de features)
+- El libro **no muestra código**; está en celdas `remove-cell` de `ml/regression.ipynb` en
+  github.com/whitead/dmol-book (bajado con `gh api`). Diferencias con su texto: las $f$ features son
+  combinaciones lineales aleatorias de los 17 descriptores ($X \cdot F$), el ajuste es `lstsq`
+  (`adam_fit` definida pero sin usar) y la 2.ª figura es con **500** moléculas, no 250.
+- **Rango de los 17 descriptores = 16**: `RingCount = NumAromaticRings + NumAliphaticRings`. Las curvas
+  del libro son exactamente planas desde f = 16–17 → su experimento no puede cruzar f = N.
+- Libro N = 25: mejor test 3.69 (f = 3), meseta test 15.11 / train 0.57. N = 500: meseta 3.10 / 2.43.
+  Train y test se sortean por separado → 17–32 moléculas repetidas por reparto con N = 500.
+- *Variante propia*: `Descriptors.CalcMolDescriptors` (217 en RDKit 2026.03.6), caché en
+  `data/rdkit_descriptores.csv`. Fuera `Ipc` (hasta 1e158) y 12 descriptores de cargas Gasteiger
+  (BCUT2D ×8 fallan en 886 moléculas, casi todas sales/metales) → 9980 moléculas × 204 descriptores.
+  Mediana de 100 repartos (la media llega a 2e7 por extrapolaciones).
+  - N = 25: pico del test en f = 24–25 (mediana 118–138), train = 0, **doble descenso** hasta 5.72 con
+    150 features; nunca bate a predecir la media (5.61).
+  - N = 250: óptimo 3.71 con f = 30; después overfitting (75.4 con 200).
+  - Norma de los pesos: pico 29.3 en f = 24; 1.05 con 150 (lstsq da la solución de norma mínima) →
+    gancho a L2 (3.5).
+
 ---
 
 ## Punto de partida de la próxima sesión
 
-**3.3 Exploring Effect of Feature Number** en `notebooks/03_regresion.ipynb` (añadir celdas tras el
-resumen de 3.2.1–3.2.2, que es la última celda). El libro va añadiendo features una a una y mide
-cómo cambian las pérdidas de train y de test.
+**3.4 Bias Variance Decomposition** en `notebooks/03_regresion.ipynb` (añadir celdas tras el resumen
+de 3.3, que es la última celda). Mirar primero si el libro tiene celdas `remove-cell` en GitHub.
 
 Ganchos que siguen abiertos para el resto del capítulo:
 - **El RMSE = 1.658 del capítulo 2 sigue sin medirse en test** → 3.6 (k-fold).
 - **Ejercicio 10**: sesgos por `Group` → leave-one-class-out (3.8.1).
 - **Extrapolación / rafinosa** → dominio de aplicabilidad y scaffold splits (3.8).
-- **Multicolinealidad** del capítulo 2 → regularización L2/L1 (3.5).
+- **Multicolinealidad** del capítulo 2 y **norma de los pesos** de 3.3 → regularización L2/L1 (3.5).
 - **Underfitting / sesgo** visto en los controles de 3.2.1 → 3.4.
 - Early stopping mencionado; el conjunto de validación aún no se ha tratado en detalle.
