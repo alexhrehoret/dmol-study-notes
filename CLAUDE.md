@@ -58,3 +58,6 @@ usar *small multiples* en vez de más colores.
 - El libro descarga el CSV por URL en cada celda; nosotros leemos `data/curated-solubility-dataset.csv`.
 - El libro es de 2021 y usa APIs retiradas. Ya encontrado: `sns.distplot` → `sns.histplot`.
 - `rdkit.Chem.rdMolDescriptors` hay que importarlo explícitamente (`from rdkit.Chem import rdMolDescriptors`).
+- El libro no fija semillas aleatorias. Nosotros **sí** (`sample(..., random_state=N)`,
+  `np.random.default_rng(N)`), para que las cifras del texto coincidan con las celdas al reejecutar.
+  Decirlo en el notebook, y si la semilla cambia la conclusión, enseñar varias.
