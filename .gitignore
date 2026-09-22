@@ -3,3 +3,7 @@
 __pycache__/
 data/*.csv
 figuras/
+
+# Solo para uso local (lanzador de macOS y workspace de Jupyter)
+Abrir Jupyter.command
+.jupyter/

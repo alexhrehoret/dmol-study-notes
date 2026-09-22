@@ -7,12 +7,17 @@ Seguimos el libro **Deep Learning for Molecules and Materials** (https://dmol.pu
 - Explicaciones en español; código y variables en inglés, como en el libro.
 - **Nivel de detalle alto**: explicar qué es cada herramienta, por qué se usa y qué significa cada número del resultado. Cero conocimiento previo de ML o de tooling de Python; la química sí se da por sabida.
 - Reproducir primero lo que hace el libro; las variantes propias van después y se marcan como tal.
-- Actualizar `PROGRESO.md` al cerrar cada sección, y commit + push al repo privado.
+- Actualizar `PROGRESO.md` al cerrar cada sección, y commit + push al repo **público**
+  https://github.com/alexhrehoret/dmol-study-notes (antes `ML_Projects`, privado).
 - **Calcular antes de redactar**: ejecutar el código y mirar la salida real antes de escribir la
   celda de markdown que la interpreta. Nunca poner cifras de memoria.
 - **Resumen al cerrar cada capítulo**, antes de pasar al siguiente: breve, solo las enseñanzas
   core (incluidos los hallazgos de nuestras variantes, con sus cifras). Va en `RESUMENES.md`
-  (un apartado por capítulo), no en el notebook, para repasarlo sin abrir Jupyter.
+  (español) **y** en `SUMMARIES.md` (inglés), un apartado por capítulo, no en el notebook.
+- **El repo es público** y sirve de credencial ante un público que no habla español. Al cerrar un
+  capítulo: actualizar la tabla *Contents* del `README.md` (y *What is different from the book* si
+  hay hallazgos nuevos). Los notebooks siguen en español; traducir uno a `notebooks_en/` solo si se
+  pide, y solo con el capítulo cerrado.
 - **Una idea por celda de markdown.** No juntar el cierre de una sección con el encabezado de la
   siguiente: rompe la posibilidad de insertar contenido después sin descolocarlo.
 
@@ -33,7 +38,7 @@ source /opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh && conda act
 
 Kernel de Jupyter: `Python (dmol)`.
 
-Arranque: doble clic en `Abrir Jupyter.command`. Usa un *workspace* de Jupyter Lab llamado `dmol`
+Arranque: doble clic en `Abrir Jupyter.command` (solo local: está en `.gitignore`, igual que `.jupyter/`). Usa un *workspace* de Jupyter Lab llamado `dmol`
 que abre todos los notebooks en pestañas. Si añades un notebook nuevo y quieres que se abra solo:
 
 ```bash

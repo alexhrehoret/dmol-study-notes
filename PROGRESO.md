@@ -71,8 +71,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 ## Notas de cada sesión
 
 ### 2026-09-11 — Montaje y capítulos 1 y 2
-- Entorno conda `dmol` (Python 3.11) y estructura del proyecto. Repo privado:
-  https://github.com/alexhrehoret/ML_Projects
+- Entorno conda `dmol` (Python 3.11) y estructura del proyecto. Repo (entonces privado,
+  `ML_Projects`; desde el 2026-09-22 público como https://github.com/alexhrehoret/dmol-study-notes)
 - AqSolDB cacheado en `data/curated-solubility-dataset.csv` (9982 compuestos, 26 columnas).
 - **2.1 y 2.2**: los 6 ingredientes, la notación ($f$ real vs $\hat{f}$ modelo), features
   (17 descriptores RDKit) vs label (`Solubility`).
@@ -201,6 +201,16 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
   TPSA positivo. L1 `alpha=0.05` anula 7/17 (HeavyAtomCount −5.795 y NumValenceElectrons +4.962 → 0).
   Orden de entrada: MolLogP, MolWt, NumAromaticRings/RingCount, NumHDonors.
 - *Variante propia*: 200 bootstraps de 500 moléculas → **149 conjuntos distintos**; solo MolLogP en el 100 %.
+
+### 2026-09-22 — Repo público
+- Renombrado a **`dmol-study-notes`** y hecho **público** como credencial (público objetivo: no hispanohablante).
+- `README.md` en inglés con apartado en español: crédito y cita BibTeX del libro (White 2021, LiveCoMS,
+  doi:10.33011/livecoms.3.1.1499; libro CC BY-NC 3.0), cita de AqSolDB, qué aporta, índice, uso de Claude
+  como tutor declarado, cómo ejecutar. `SUMMARIES.md` = `RESUMENES.md` en inglés.
+- `LICENSE` CC BY-NC 4.0 (obra derivada). `environment.yml` (conda-forge) y `data/README.md`.
+- `Abrir Jupyter.command` y `.jupyter/` fuera de git (siguen en local). Commits nuevos con email noreply
+  (`git config user.email` local); los 11 anteriores conservan el gmail.
+- Notebooks siguen en español; traducir a `notebooks_en/` solo capítulos cerrados y si se pide.
 
 ---
 
