@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.4)** · Actualizado: 2026-09-16
+Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.5)** · Actualizado: 2026-09-22
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -31,8 +31,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 3.2.1 Overfitting with Synthetic Data (4 escenarios + controles sin ruido + 10 semillas)
   - [x] 3.2.2 Overfitting Conclusion
   - [x] 3.3 Exploring Effect of Feature Number (libro + variante con descriptores RDKit)
-  - [ ] 3.4 Bias Variance Decomposition ← siguiente
-  - [ ] 3.5 Regularization (L2, L1)
+  - [x] 3.4 Bias Variance Decomposition (libro + variantes: sin reemplazo, N = 100, varianza por x)
+  - [ ] 3.5 Regularization (L2, L1) ← siguiente
   - [ ] 3.6 Strategies to Assess Models (k-fold, LOOCV)
   - [ ] 3.7 Computing Other Measures (bootstrap, jackknife+)
   - [ ] 3.8 Training Data Distribution (leave-one-class-out, scaffold splits)
@@ -172,17 +172,33 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
   - Norma de los pesos: pico 29.3 en f = 24; 1.05 con 150 (lstsq da la solución de norma mínima) →
     gancho a L2 (3.5).
 
+### 2026-09-22 — Capítulo 3: 3.4 (descomposición sesgo–varianza)
+- Nueva convención: **resumen breve de enseñanzas core al cerrar cada capítulo**, en `RESUMENES.md`
+  (ver CLAUDE.md). El primero toca al cerrar el capítulo 3.
+- Derivación propia en dos pasos (solo ruido → $(f-\hat f)^2 + \sigma^2$; luego sumar y restar $\bar f$).
+  El libro escribe $f - \epsilon$ (errata inocua). Analogía: sesgo = veracidad, varianza = precisión (ISO 5725).
+- Código oculto del libro (`remove-cell`): **rehace los datos con σ = 1** (no 5), y el train se sortea
+  **con reemplazo** (`choice` sin `replace=False`) → 8.02 puntos distintos de 10 de media.
+- 1 feature ($x$, sin intercepto), 250 repartos: sesgo² 60.20, varianza 9.80. 7 features, 1000 repartos:
+  varianza 20 572.59; su "sesgo²" 34.10 es error de estimación (media de valores ±1000), no sesgo real.
+- Barrido 1–5 features (2500 repartos): mínimo en **4 (test 16.11, sesgo² 0.18, var 14.21)**; 5 → var 605.71.
+  sesgo² + var + 1 cuadra con el test a < 3 unidades. 3 features peor que 2 (85.08 vs 52.04): no es una U.
+- *Variante propia*: sin reemplazo, var con 4 features 1.87 (×7.6 menos), test 3.77. Con N = 100, test
+  1.21–1.45 de 4 a 7 features (≈ ruido); var de 7 features 21 994.75 → 0.30; el sesgo de 1 feature no baja (157.78).
+- *Variante propia*: varianza por punto: 0.6 en el centro vs 65.3 en x = −3 (4 features); hasta 3651.6
+  (5 features). Extrapolación → rafinosa → dominio de aplicabilidad (3.8).
+
 ---
 
 ## Punto de partida de la próxima sesión
 
-**3.4 Bias Variance Decomposition** en `notebooks/03_regresion.ipynb` (añadir celdas tras el resumen
-de 3.3, que es la última celda). Mirar primero si el libro tiene celdas `remove-cell` en GitHub.
+**3.5 Regularization** en `notebooks/03_regresion.ipynb` (añadir celdas tras el resumen de 3.4, que es
+la última celda). Mirar primero si el libro tiene celdas `remove-cell` en GitHub.
 
 Ganchos que siguen abiertos para el resto del capítulo:
 - **El RMSE = 1.658 del capítulo 2 sigue sin medirse en test** → 3.6 (k-fold).
 - **Ejercicio 10**: sesgos por `Group` → leave-one-class-out (3.8.1).
-- **Extrapolación / rafinosa** → dominio de aplicabilidad y scaffold splits (3.8).
-- **Multicolinealidad** del capítulo 2 y **norma de los pesos** de 3.3 → regularización L2/L1 (3.5).
-- **Underfitting / sesgo** visto en los controles de 3.2.1 → 3.4.
-- Early stopping mencionado; el conjunto de validación aún no se ha tratado en detalle.
+- **Extrapolación / rafinosa / varianza en los bordes (3.4)** → dominio de aplicabilidad y scaffold splits (3.8).
+- **Multicolinealidad** del capítulo 2, **norma de los pesos** de 3.3 y **varianza** de 3.4 → regularización L2/L1 (3.5).
+- Early stopping mencionado (3.2 y 3.4); el conjunto de validación aún no se ha tratado en detalle.
+- Al cerrar el capítulo 3 (tras 3.10): escribir su apartado en `RESUMENES.md`.

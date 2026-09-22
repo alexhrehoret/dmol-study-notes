@@ -10,6 +10,9 @@ Seguimos el libro **Deep Learning for Molecules and Materials** (https://dmol.pu
 - Actualizar `PROGRESO.md` al cerrar cada sección, y commit + push al repo privado.
 - **Calcular antes de redactar**: ejecutar el código y mirar la salida real antes de escribir la
   celda de markdown que la interpreta. Nunca poner cifras de memoria.
+- **Resumen al cerrar cada capítulo**, antes de pasar al siguiente: breve, solo las enseñanzas
+  core (incluidos los hallazgos de nuestras variantes, con sus cifras). Va en `RESUMENES.md`
+  (un apartado por capítulo), no en el notebook, para repasarlo sin abrir Jupyter.
 - **Una idea por celda de markdown.** No juntar el cierre de una sección con el encabezado de la
   siguiente: rompe la posibilidad de insertar contenido después sin descolocarlo.
 
