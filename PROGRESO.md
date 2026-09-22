@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.5)** · Actualizado: 2026-09-22
+Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.6)** · Actualizado: 2026-09-22
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -32,8 +32,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 3.2.2 Overfitting Conclusion
   - [x] 3.3 Exploring Effect of Feature Number (libro + variante con descriptores RDKit)
   - [x] 3.4 Bias Variance Decomposition (libro + variantes: sin reemplazo, N = 100, varianza por x)
-  - [ ] 3.5 Regularization (L2, L1) ← siguiente
-  - [ ] 3.6 Strategies to Assess Models (k-fold, LOOCV)
+  - [x] 3.5 Regularization (L2, L1) (libro con ridge exacto + estandarizar + lasso en solubilidad + bootstrap)
+  - [ ] 3.6 Strategies to Assess Models (k-fold, LOOCV) ← siguiente
   - [ ] 3.7 Computing Other Measures (bootstrap, jackknife+)
   - [ ] 3.8 Training Data Distribution (leave-one-class-out, scaffold splits)
   - [ ] 3.9 Chapter Summary
@@ -188,17 +188,31 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 - *Variante propia*: varianza por punto: 0.6 en el centro vs 65.3 en x = −3 (4 features); hasta 3651.6
   (5 features). Extrapolación → rafinosa → dominio de aplicabilidad (3.8).
 
+### 2026-09-22 — Resúmenes de capítulo y 3.5 (regularización)
+- `RESUMENES.md` creado con los capítulos 1 y 2 (cifras sacadas de los notebooks).
+- Código oculto del libro para L2: 7 features sin estandarizar, reparto **sin** reemplazo, 1000 repartos,
+  pérdida `mean(w**2)` que **penaliza w0**, y ajuste con 100 pasos de Adam que **no converge** (λ = 1: 3.366
+  frente a 1.416 exacto). Usamos `ridge_exact` (fórmula cerrada). L1 no tiene código en el libro.
+- Montaje del libro: λ = 1 → var 1379.17 → 127.73, test 1385.20 → 131.85. Sin estandarizar **no hay U**:
+  la varianza vuelve a subir (175.06 con λ = 31.62) y el test baja a 64.61 con λ = 1000.
+- *Variante propia*: estandarizado y sin penalizar w0 → U limpia, mínimo λ = 0.1, **test 8.67** (160× menos;
+  cerca del 3.77 de las 4 features exactas en 3.4). Elegir λ mirando el test es trampa → 3.6.
+- *Variante propia* (solubilidad, sklearn): L2 `alpha=1e4` pone negativos todos los descriptores de tamaño y
+  TPSA positivo. L1 `alpha=0.05` anula 7/17 (HeavyAtomCount −5.795 y NumValenceElectrons +4.962 → 0).
+  Orden de entrada: MolLogP, MolWt, NumAromaticRings/RingCount, NumHDonors.
+- *Variante propia*: 200 bootstraps de 500 moléculas → **149 conjuntos distintos**; solo MolLogP en el 100 %.
+
 ---
 
 ## Punto de partida de la próxima sesión
 
-**3.5 Regularization** en `notebooks/03_regresion.ipynb` (añadir celdas tras el resumen de 3.4, que es
-la última celda). Mirar primero si el libro tiene celdas `remove-cell` en GitHub.
+**3.6 Strategies to Assess Models** en `notebooks/03_regresion.ipynb` (añadir celdas tras el resumen de 3.5,
+que es la última celda). Mirar primero si el libro tiene celdas `remove-cell` en GitHub.
 
 Ganchos que siguen abiertos para el resto del capítulo:
 - **El RMSE = 1.658 del capítulo 2 sigue sin medirse en test** → 3.6 (k-fold).
 - **Ejercicio 10**: sesgos por `Group` → leave-one-class-out (3.8.1).
 - **Extrapolación / rafinosa / varianza en los bordes (3.4)** → dominio de aplicabilidad y scaffold splits (3.8).
-- **Multicolinealidad** del capítulo 2, **norma de los pesos** de 3.3 y **varianza** de 3.4 → regularización L2/L1 (3.5).
+- **Elegir λ sin mirar el test** (3.5) → validación cruzada (3.6).
 - Early stopping mencionado (3.2 y 3.4); el conjunto de validación aún no se ha tratado en detalle.
 - Al cerrar el capítulo 3 (tras 3.10): escribir su apartado en `RESUMENES.md`.
