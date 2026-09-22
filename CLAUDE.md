@@ -9,6 +9,8 @@ Seguimos el libro **Deep Learning for Molecules and Materials** (https://dmol.pu
 - Reproducir primero lo que hace el libro; las variantes propias van después y se marcan como tal.
 - Actualizar `PROGRESO.md` al cerrar cada sección, y commit + push al repo **público**
   https://github.com/alexhrehoret/dmol-study-notes (antes `ML_Projects`, privado).
+- **Mensajes de commit en inglés** (se ven en la portada del repo). Describir el contenido
+  (p. ej. `Chapter 3: 3.6 cross-validation`), nunca la gestión del propio repo.
 - **Calcular antes de redactar**: ejecutar el código y mirar la salida real antes de escribir la
   celda de markdown que la interpreta. Nunca poner cifras de memoria.
 - **Resumen al cerrar cada capítulo**, antes de pasar al siguiente: breve, solo las enseñanzas
