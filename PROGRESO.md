@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.6)** · Actualizado: 2026-09-22
+Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.7)** · Actualizado: 2026-09-23
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -33,8 +33,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 3.3 Exploring Effect of Feature Number (libro + variante con descriptores RDKit)
   - [x] 3.4 Bias Variance Decomposition (libro + variantes: sin reemplazo, N = 100, varianza por x)
   - [x] 3.5 Regularization (L2, L1) (libro con ridge exacto + estandarizar + lasso en solubilidad + bootstrap)
-  - [ ] 3.6 Strategies to Assess Models (k-fold, LOOCV) ← siguiente
-  - [ ] 3.7 Computing Other Measures (bootstrap, jackknife+)
+  - [x] 3.6 Strategies to Assess Models (k-fold, LOOCV) (libro + barajar, fiabilidad con N = 25, cap. 2 en CV, λ por LOOCV)
+  - [ ] 3.7 Computing Other Measures (bootstrap, jackknife+) ← siguiente
   - [ ] 3.8 Training Data Distribution (leave-one-class-out, scaffold splits)
   - [ ] 3.9 Chapter Summary
   - [ ] 3.10 Exercises
@@ -212,17 +212,42 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
   (`git config user.email` local); los 11 anteriores conservan el gmail.
 - Notebooks siguen en español; traducir a `notebooks_en/` solo capítulos cerrados y si se pide.
 
+### 2026-09-23 — Capítulo 3: 3.6 (validación cruzada)
+- Todo el código de 3.6 en el libro es visible (sin `remove-cell`). Detalles: **no baraja**, $b$ = media del
+  residuo tras `lstsq` sin constante (MSE train 2.738 vs 2.724 conjunto), segmentos `N // k` (deja datos sin
+  examinar). LOOCV solo definido, sin código.
+- Libro 10-fold: **2.97 ± 2.10** (segmentos 1.39–6.93). **El CSV está ordenado por fuente** (prefijo del `ID`,
+  A–I; A = 3656). Los segmentos de A (mezclas, metales: cromo real −10.02 → −0.65) son los malos.
+  *Variante*: barajado **2.80 ± 0.33**. Barrido k: sin barajar k = 2 → 4.92; barajado 2.80–2.84 para todo k.
+  std entre segmentos crece con k (0.10 → 0.52); error estándar ≈ 0.1 con cualquier k.
+- Libro N = 25 (`random_state=4`): k = 2 → 263.52 (13 train < 17 features), k = 3 → 83.32, k = 5 → 19.63.
+  Con k ≥ 13 los modelos son idénticos (LOO) y solo cambia qué moléculas se examinan: la bajada 16.52 → 11.42
+  es artefacto.
+- *Variante* 200 muestras de 25 vs las 9957 restantes: error real mediana **18.48** (> 5.61 de predecir la
+  media). Medianas CV: k = 2 40.74, k = 3 172.37, k = 5 23.37, k = 10 15.18, LOOCV 12.56. **Spearman ≈ 0.1**
+  con el error real; LOOCV a < ×2 solo en el 46 %. Cita: Varoquaux 2018 (NeuroImage).
+- *Variante*: RMSE del cap. 2 en 10-fold (estandarizando dentro de cada ronda): **1.671** vs 1.651 train
+  (5 semillas 1.671–1.681).
+- **CORRECCIÓN al cap. 2**: el "óptimo" MSE 2.708 era artefacto de float32 (rango 18 en vez de 17 por romper
+  `RingCount = Arom + Aliph`; pesos hasta 3.04e6). Óptimo real **2.724** (RMSE 1.651). RESUMENES ("1.65") sigue bien.
+- *Variante*: λ por LOOCV dentro del train (montaje 3.5, mismos 1000 repartos): media **54.90** (oráculo 8.67,
+  λ = 0 1385.20), mediana 3.39 (oráculo 3.00). λ = 0 elegida 17 veces (error 876.75).
+
 ---
 
 ## Punto de partida de la próxima sesión
 
-**3.6 Strategies to Assess Models** en `notebooks/03_regresion.ipynb` (añadir celdas tras el resumen de 3.5,
-que es la última celda). Mirar primero si el libro tiene celdas `remove-cell` en GitHub.
+**3.7 Computing Other Measures** (bootstrap y jackknife+) en `notebooks/03_regresion.ipynb` (añadir tras
+el resumen de 3.6, la última celda). El código de 3.7 del libro es visible, pero **su jackknife+ tiene un
+bug**: calcula los residuos sobre los puntos de *train* (`iloc[idx]`) en vez de sobre el punto excluido `i`,
+e imprime `(qlow - qhigh)/2`, que sale negativo. Además mezcla intervalo del 95 % (bootstrap) con 90 %
+(jackknife+). Reproducir, enseñarlo y corregirlo.
 
 Ganchos que siguen abiertos para el resto del capítulo:
-- **El RMSE = 1.658 del capítulo 2 sigue sin medirse en test** → 3.6 (k-fold).
-- **Ejercicio 10**: sesgos por `Group` → leave-one-class-out (3.8.1).
-- **Extrapolación / rafinosa / varianza en los bordes (3.4)** → dominio de aplicabilidad y scaffold splits (3.8).
-- **Elegir λ sin mirar el test** (3.5) → validación cruzada (3.6).
-- Early stopping mencionado (3.2 y 3.4); el conjunto de validación aún no se ha tratado en detalle.
-- Al cerrar el capítulo 3 (tras 3.10): escribir su apartado en `RESUMENES.md`.
+- **Ejercicio 10 + CSV ordenado por fuente (3.6)** → leave-one-class-out por fuente/`Group` (3.8.1).
+- **Extrapolación / rafinosa / varianza en los bordes (3.4) / metales y mezclas (3.6)** → dominio de
+  aplicabilidad y scaffold splits (3.8).
+- Con pocos datos la CV no basta (3.6) → intervalos honestos (3.7).
+- Conjunto de validación mencionado en 3.6; *nested CV* solo nombrada.
+- Al cerrar el capítulo 3 (tras 3.10): su apartado en `RESUMENES.md` y `SUMMARIES.md`, y la tabla
+  *Contents* del `README.md`.
