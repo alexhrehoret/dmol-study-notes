@@ -66,5 +66,5 @@ estructura, sin un criterio objetivo de acierto).
 - Escalar las **labels** no cambia el learning rate válido, porque el Hessiano del MSE solo depende de
   $X$ (ej. 5).
 - MSE y MAE dan modelos distintos: la pérdida define qué significa equivocarse (ej. 6).
-- Las fuentes experimentales (`Group`) tienen sesgos propios, así que un split aleatorio puede engañar
-  (ej. 10).
+- Los grupos de `Group` tienen sesgos propios (ej. 10). *Corregido en 3.8*: `Group` no es la fuente
+  experimental sino el grupo de fiabilidad de AqSolDB (nº de medidas y si discrepan).

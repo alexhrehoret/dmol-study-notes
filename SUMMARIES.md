@@ -67,4 +67,5 @@ no objective criterion of success).
 - Scaling the **labels** does not change the valid learning rate, because the Hessian of the MSE only
   depends on $X$ (ex. 5).
 - MSE and MAE give different models: the loss defines what "being wrong" means (ex. 6).
-- The experimental sources (`Group`) have their own biases, so a random split can mislead (ex. 10).
+- The `Group` classes have their own biases (ex. 10). *Corrected in 3.8*: `Group` is not the
+  experimental source but AqSolDB's reliability group (number of measurements and whether they agree).

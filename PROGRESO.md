@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.8)** · Actualizado: 2026-09-23
+Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.9)** · Actualizado: 2026-09-23
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -35,8 +35,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 3.5 Regularization (L2, L1) (libro con ridge exacto + estandarizar + lasso en solubilidad + bootstrap)
   - [x] 3.6 Strategies to Assess Models (k-fold, LOOCV) (libro + barajar, fiabilidad con N = 25, cap. 2 en CV, λ por LOOCV)
   - [x] 3.7 Computing Other Measures (bootstrap, jackknife+) (libro + bug corregido + cobertura con N = 1000 y N = 25)
-  - [ ] 3.8 Training Data Distribution (leave-one-class-out, scaffold splits) ← siguiente
-  - [ ] 3.9 Chapter Summary
+  - [x] 3.8 Training Data Distribution (leave-one-class-out, scaffold splits) (libro + bug de `k_error` + `Group` ≠ fuente + LOCO por fuente + qué hay en el test del scaffold split + error vs similitud)
+  - [ ] 3.9 Chapter Summary ← siguiente
   - [ ] 3.10 Exercises
 - [ ] 4. Classification
 - [ ] 5. Kernel Learning
@@ -248,18 +248,35 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
   **J+ del libro 61.9 %** (anchura 3.6; residuos de train de modelo sobreajustado); **J+ corregido 93.3 %**
   media (mediana 96.1 %, 79 % de muestras ≥ 90 %), anchura 13.4.
 
+### 2026-09-23 — Capítulo 3: 3.8 (distribución de los datos de entrenamiento)
+- Código del libro visible (LOCOCV y scaffold split). **Bug de LOCOCV**: `k_error` no se reinicia y arrastra los 24
+  errores del barrido de 25 moléculas de 3.6; `error` = medias acumuladas. La web imprime **50.33** y el texto lo
+  llama "similar" al 5-fold 3.16. Reconstruido aquí (`random_state=4`): 10.56. Errores reales por clase G1 3.25,
+  G3 2.08, G5 2.56, G4 6.67, G2 6.48; agregado **3.20**, media de clases 4.21.
+- **CORRECCIÓN (libro y ej. 10 del cap. 2)**: `Group` **no es la fuente**, es el grupo de fiabilidad de AqSolDB
+  (G1 1 medida; G2/G3 2 medidas con SD > / ≤ 0.5; G4/G5 ≥ 3 medidas con SD > / ≤ 0.5). Las 9 fuentes (prefijo del
+  `ID`) aportan a los 5 grupos. Nota añadida en `02_ejercicios_resueltos.ipynb` y línea corregida en RESUMENES/SUMMARIES.
+- *Variante*: LOCO frente al error de las mismas moléculas en 10-fold barajado (2.80 global). Por `Group`: iguales
+  (G2/G4 altos por ruido de labels). Por fuente: 8/9 iguales; **A 10.40 vs 4.75**, mediana 1.31 vs 1.42 (pocas mezclas
+  y metales). Agregado por fuente **5.02**.
+- Scaffold split = libro: **5.48** vs 2.83 al azar; 1650 scaffolds, 1996/7984 (2 N-óxidos que RDKit no lee). 1947
+  scaffolds, 1343 únicos; scaffold vacío 2940 (nunca va a test). Test = scaffolds de 1–3 moléculas.
+- *Variante*: test del scaffold split es otra población: 0 % acíclicas (36.8 % en train), 3.21 anillos vs 1.09, MolWt
+  305 vs 212, solubilidad −3.50 vs −2.74. Mismas moléculas en 10-fold: 3.73 (resto 2.57); mediana 1.08 vs 1.07; sin el
+  1 % peor 3.15 vs 2.56. Las peores son mezclas. Azar con 20 semillas: 2.33–3.00.
+- *Variante*: error vs similitud Tanimoto (Morgan r = 2, 2048 bits) al vecino más cercano en 10-fold: < 0.3 (313
+  moléculas) MSE **8.70**; por encima plano 2.15–3.09. Similitud mediana 0.625 (10-fold) vs 0.409 (scaffold test).
+  El modelo lineal no usa vecinos → el dominio de aplicabilidad depende del modelo.
+
 ---
 
 ## Punto de partida de la próxima sesión
 
-**3.8 Training Data Distribution** (leave-one-class-out y scaffold splits) en `notebooks/03_regresion.ipynb`
-(añadir tras el resumen de 3.7, la última celda). `MurckoScaffold` ya está importado en la celda de imports.
-Mirar primero el código del libro (visible u oculto) y contrastarlo.
+**3.9 Chapter Summary** y **3.10 Exercises** en `notebooks/03_regresion.ipynb` (añadir tras el resumen de 3.8, la
+última celda). Los ejercicios del libro: overfitting (2), regularización (3: L1 con N = 35, estabilidad, L-infinito)
+y evaluación (1: el mejor modelo lineal para todo el dataset). Enunciados en el notebook del capítulo; soluciones en
+`03_ejercicios_resueltos.ipynb` (como en el cap. 2).
 
-Ganchos que siguen abiertos para el resto del capítulo:
-- **Ejercicio 10 + CSV ordenado por fuente (3.6)** → leave-one-class-out por fuente (prefijo del `ID`) y/o `Group` (3.8.1).
-- **Extrapolación**: rafinosa (3.2), varianza en los bordes (3.4), metales y mezclas (3.6), jackknife+ con
-  62.3 % fuera del rango (3.7) → dominio de aplicabilidad y scaffold splits (3.8).
-- Conjunto de validación mencionado en 3.6; *nested CV* solo nombrada.
-- Al cerrar el capítulo 3 (tras 3.10): su apartado en `RESUMENES.md` y `SUMMARIES.md`, y la tabla
-  *Contents* del `README.md`.
+Al cerrar el capítulo 3 (tras 3.10): su apartado en `RESUMENES.md` y `SUMMARIES.md`, la tabla *Contents* del
+`README.md` y *What is different from the book* (añadir 3.6 sin barajar sobre CSV ordenado, 3.7 bug del jackknife+,
+3.8 bug de `k_error` y `Group` ≠ fuente).
