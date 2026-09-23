@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.7)** · Actualizado: 2026-09-23
+Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.8)** · Actualizado: 2026-09-23
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -34,8 +34,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 3.4 Bias Variance Decomposition (libro + variantes: sin reemplazo, N = 100, varianza por x)
   - [x] 3.5 Regularization (L2, L1) (libro con ridge exacto + estandarizar + lasso en solubilidad + bootstrap)
   - [x] 3.6 Strategies to Assess Models (k-fold, LOOCV) (libro + barajar, fiabilidad con N = 25, cap. 2 en CV, λ por LOOCV)
-  - [ ] 3.7 Computing Other Measures (bootstrap, jackknife+) ← siguiente
-  - [ ] 3.8 Training Data Distribution (leave-one-class-out, scaffold splits)
+  - [x] 3.7 Computing Other Measures (bootstrap, jackknife+) (libro + bug corregido + cobertura con N = 1000 y N = 25)
+  - [ ] 3.8 Training Data Distribution (leave-one-class-out, scaffold splits) ← siguiente
   - [ ] 3.9 Chapter Summary
   - [ ] 3.10 Exercises
 - [ ] 4. Classification
@@ -233,21 +233,33 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 - *Variante*: λ por LOOCV dentro del train (montaje 3.5, mismos 1000 repartos): media **54.90** (oráculo 8.67,
   λ = 0 1385.20), mediana 3.39 (oráculo 3.00). λ = 0 elegida 17 veces (error 876.75).
 
+### 2026-09-23 — Capítulo 3: 3.7 (bootstrap y jackknife+)
+- Montaje del libro: 1000 moléculas + 1 punto (`random_state=4`), el PCB 2,2',3,3',4,6'-hexaclorobifenilo
+  (real −7.65). Bootstrap 100 remuestreos (`default_rng(4)`): **−6.77 ± 0.53**, el real queda fuera.
+  632.3 moléculas distintas por remuestreo (63.2 %). Corrección al texto: $\binom{2N-1}{N}$ remuestreos, no $2^N$.
+- **Bug del jackknife+ del libro**: residuos de train (`iloc[idx]`) en vez del excluido; imprime "± −3.27";
+  "test error" = mediana de residuos de train. Corregido: **−6.69 ± 3.43** [−10.12, −3.26]. Con N = 1000
+  el bug casi no cambia nada (residuos LOO 0.977 vs train 0.968); dispersión LOO de la predicción 0.0094.
+- **Nivel**: cuantiles 0.05/0.95 de $q_1$/$q_2$ = α = 0.05 → intervalo al 95 %, garantía ≥ 90 % (no 90/80).
+- *Variante* cobertura N = 1000 sobre 8981: **bootstrap 25.6 %** (promete 95), **jackknife+ 96.0 %**.
+  J+ da ±3.43 a todas (anchura 6.86–6.87); fuera del rango del train (77 moléculas) cubre **62.3 %**;
+  bootstrap se ensancha al extrapolar (0.857 → 4.878) pero cubre 39.0 %. Garantía marginal → dominio de aplicabilidad.
+- *Variante* 200 muestras de 25: bootstrap 99.9 % con anchura **41.4** (≈16 moléculas distintas < 17 features);
+  **J+ del libro 61.9 %** (anchura 3.6; residuos de train de modelo sobreajustado); **J+ corregido 93.3 %**
+  media (mediana 96.1 %, 79 % de muestras ≥ 90 %), anchura 13.4.
+
 ---
 
 ## Punto de partida de la próxima sesión
 
-**3.7 Computing Other Measures** (bootstrap y jackknife+) en `notebooks/03_regresion.ipynb` (añadir tras
-el resumen de 3.6, la última celda). El código de 3.7 del libro es visible, pero **su jackknife+ tiene un
-bug**: calcula los residuos sobre los puntos de *train* (`iloc[idx]`) en vez de sobre el punto excluido `i`,
-e imprime `(qlow - qhigh)/2`, que sale negativo. Además mezcla intervalo del 95 % (bootstrap) con 90 %
-(jackknife+). Reproducir, enseñarlo y corregirlo.
+**3.8 Training Data Distribution** (leave-one-class-out y scaffold splits) en `notebooks/03_regresion.ipynb`
+(añadir tras el resumen de 3.7, la última celda). `MurckoScaffold` ya está importado en la celda de imports.
+Mirar primero el código del libro (visible u oculto) y contrastarlo.
 
 Ganchos que siguen abiertos para el resto del capítulo:
-- **Ejercicio 10 + CSV ordenado por fuente (3.6)** → leave-one-class-out por fuente/`Group` (3.8.1).
-- **Extrapolación / rafinosa / varianza en los bordes (3.4) / metales y mezclas (3.6)** → dominio de
-  aplicabilidad y scaffold splits (3.8).
-- Con pocos datos la CV no basta (3.6) → intervalos honestos (3.7).
+- **Ejercicio 10 + CSV ordenado por fuente (3.6)** → leave-one-class-out por fuente (prefijo del `ID`) y/o `Group` (3.8.1).
+- **Extrapolación**: rafinosa (3.2), varianza en los bordes (3.4), metales y mezclas (3.6), jackknife+ con
+  62.3 % fuera del rango (3.7) → dominio de aplicabilidad y scaffold splits (3.8).
 - Conjunto de validación mencionado en 3.6; *nested CV* solo nombrada.
 - Al cerrar el capítulo 3 (tras 3.10): su apartado en `RESUMENES.md` y `SUMMARIES.md`, y la tabla
   *Contents* del `README.md`.
