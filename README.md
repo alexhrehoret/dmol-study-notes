@@ -58,6 +58,17 @@ compounds.* Scientific Data **2019**, 6, 143. <https://doi.org/10.1038/s41597-01
   - **3.5** — the ridge fit (100 Adam steps) does not reach the minimum. Without standardizing the
     features, the clean bias–variance "U" does not appear. With standardization, the test error
     drops from 1385 to 8.67.
+  - **3.6** — the k-fold code does not shuffle, and the CSV is sorted by data source: 2.97 ± 2.10
+    instead of 2.80 ± 0.33.
+  - **3.7** — the jackknife+ code uses training residuals instead of leave-one-out residuals. With
+    25 molecules its intervals, which should cover at least 90 %, cover only 61.9 % of the true
+    values (93.3 % once fixed).
+  - **3.8** — the leave-one-class-out loop never resets its error list (the site prints 50.33; the
+    real value is 3.20), and the `Group` column is AqSolDB's reliability group, not the data source.
+- **Exercises solved with extra analysis.** For example, chapter 3's "best linear model": ridge on
+  204 RDKit descriptors clipped to the training range plus Morgan count fingerprints reaches MSE
+  1.87 in nested cross-validation (vs 2.79 for the book's model) and 4.13 on a scaffold split (vs
+  5.49). Without clipping, the same descriptors do worse than predicting the mean.
 - **Looking at the data.** For example, AqSolDB contains 573 mixtures whose descriptors are summed,
   and 400 molecules (mostly salts) with a spurious `BalabanJ = 0`.
 
@@ -67,8 +78,9 @@ compounds.* Scientific Data **2019**, 6, 143. <https://doi.org/10.1038/s41597-01
 |---|---|---|
 | 1. Tensors and Shapes | [`01_tensores.ipynb`](notebooks/01_tensores.ipynb) | ✅ |
 | 2. Introduction to Machine Learning | [`02_introduccion.ipynb`](notebooks/02_introduccion.ipynb) · [exercises solved](notebooks/02_ejercicios_resueltos.ipynb) | ✅ |
-| 3. Regression & Model Assessment | [`03_regresion.ipynb`](notebooks/03_regresion.ipynb) | in progress (3.1–3.8) |
-| 4–22 | — | to do |
+| 3. Regression & Model Assessment | [`03_regresion.ipynb`](notebooks/03_regresion.ipynb) · [exercises solved](notebooks/03_ejercicios_resueltos.ipynb) | ✅ |
+| 4. Classification | — | next |
+| 5–22 | — | to do |
 
 - **[SUMMARIES.md](SUMMARIES.md)** — the core lessons of each finished chapter, in English, on one
   page each.

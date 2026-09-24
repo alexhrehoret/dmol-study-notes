@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1 y 2 completos. Capítulo 3 en curso (siguiente: 3.9)** · Actualizado: 2026-09-23
+Estado: **Capítulos 1, 2 y 3 completos (siguiente: capítulo 4)** · Actualizado: 2026-09-24
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -25,7 +25,7 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 2.4 Unsupervised Learning (clustering + PCA)
   - [x] 2.5 Chapter Summary
   - [x] 2.6 Exercises — enunciados en `02_introduccion.ipynb`, soluciones en `02_ejercicios_resueltos.ipynb`
-- [ ] 3. Regression & Model Assessment — `notebooks/03_regresion.ipynb`
+- [x] 3. Regression & Model Assessment — `notebooks/03_regresion.ipynb`
   - [x] 3.1 Running This Notebook (qué es regresión, esperanza/varianza, imports)
   - [x] 3.2 Overfitting — introducción (25 train / 25 test con datos reales)
   - [x] 3.2.1 Overfitting with Synthetic Data (4 escenarios + controles sin ruido + 10 semillas)
@@ -36,9 +36,9 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 3.6 Strategies to Assess Models (k-fold, LOOCV) (libro + barajar, fiabilidad con N = 25, cap. 2 en CV, λ por LOOCV)
   - [x] 3.7 Computing Other Measures (bootstrap, jackknife+) (libro + bug corregido + cobertura con N = 1000 y N = 25)
   - [x] 3.8 Training Data Distribution (leave-one-class-out, scaffold splits) (libro + bug de `k_error` + `Group` ≠ fuente + LOCO por fuente + qué hay en el test del scaffold split + error vs similitud)
-  - [ ] 3.9 Chapter Summary ← siguiente
-  - [ ] 3.10 Exercises
-- [ ] 4. Classification
+  - [x] 3.9 Chapter Summary (tabla de las 9 ideas con nuestras cifras, hilo, diferencias con el código del libro, glosario)
+  - [x] 3.10 Exercises — enunciados en `03_regresion.ipynb`, soluciones en `03_ejercicios_resueltos.ipynb`
+- [ ] 4. Classification ← siguiente
 - [ ] 5. Kernel Learning
 
 ## C. Deep Learning
@@ -270,13 +270,37 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 
 ---
 
+### 2026-09-24 — Capítulo 3: 3.9 (resumen) y 3.10 (ejercicios resueltos). Capítulo 3 cerrado
+- 3.9 en el notebook: tabla idea del libro → cifra nuestra, hilo del capítulo, tabla de diferencias con el código
+  del libro, glosario y los errores de la solubilidad según cómo se mida (2.724 train → 5.48 scaffold).
+- 3.10: enunciados con pistas en `03_regresion.ipynb`; soluciones en `03_ejercicios_resueltos.ipynb` (≈ 5 min).
+- **Ej 1** (redundantes sin ruido): dependencia exacta → test 0, pesos repartidos (0.5/0.5). Sobran → pesos 0.
+  Más features que datos → train 0, test 0.21 (13 features) / 1.4 (16) con 10 puntos. Semisintético con
+  `y_clean` (predicciones del OLS): N < 17 test mediana 4.85–0.515; N ≥ 17 test 0 salvo repartos con rango
+  incompleto (21/200 con N = 17). Indeterminación, no ruido.
+- **Ej 2**: train 0.402 → 2.728, CV 13.61 → 2.80, brecha 13.2 → 0.07. Varianza sobre 1000 de referencia
+  0.270 (500), 0.142 (1000), 0.074 (2000) ∝ 1/N. Todo converge a ~2.7 (sesgo + ruido).
+- **Ej 3** (L1, N = 35, `random_state=4`): ISTA implementado (coincide con sklearn a < 3e-7; α = λ/2).
+  Descenso de gradiente: 0 ceros. Primero cae `NumAromaticRings` (nunca entra), luego NumValenceElectrons;
+  últimos MolLogP (3.82) y MolMR (2.92) = las dos más correlacionadas con y. Test en las otras 9947: OLS 7.67
+  (> media 5.61), mejor λ del camino 3.45 con 2 features (mirando el test: optimista).
+- **Ej 4**: 200 muestras de 35. MolLogP último superviviente 88 %; HeavyAtomCount entre los 5 primeros en caer
+  84 %. Spearman medio 0.35; **187/200** conjuntos distintos con λ = 0.3.
+- **Ej 5** (L∞, datos completos): gradiente ingenuo no empata (0.414–0.425). Exacto con FISTA + proyección
+  sobre la bola L1 (Duchi 2008), verificado con SLSQP. λ = 1: 8 pesos empatados en 0.42; λ ≥ 18: los 17
+  empatados con el signo de su correlación; todo 0 desde 19.81.
+- **Ej 6** (mejor modelo lineal, 9980 moléculas, 10-fold anidado con 5-fold interno para λ): OLS 2.792;
+  17 + cuadrados/interacciones 2.282; 204 RDKit **7.461** (r² −0.33, error máx. 230); recortados al rango del
+  train **2.073**; Morgan cuentas 2.423; **204 recortados + Morgan 1.873** (RMSE 1.368). Pareado vs OLS
+  +0.919 ± 0.061; vs 204 recortados +0.201 ± 0.121 (no concluyente). Scaffold split 5.485 → **4.132**.
+  Ruido experimental (SD² media, 2236 moléculas con varias medidas) 0.266 frente a 1.803 del modelo.
+  La mezcla de 24 componentes usa espacios y no `;`: se escapa al criterio de mezclas.
+- RESUMENES/SUMMARIES con el capítulo 3; README: tabla *Contents* y *What is different* (3.6, 3.7, 3.8, ejercicios).
+
+---
+
 ## Punto de partida de la próxima sesión
 
-**3.9 Chapter Summary** y **3.10 Exercises** en `notebooks/03_regresion.ipynb` (añadir tras el resumen de 3.8, la
-última celda). Los ejercicios del libro: overfitting (2), regularización (3: L1 con N = 35, estabilidad, L-infinito)
-y evaluación (1: el mejor modelo lineal para todo el dataset). Enunciados en el notebook del capítulo; soluciones en
-`03_ejercicios_resueltos.ipynb` (como en el cap. 2).
-
-Al cerrar el capítulo 3 (tras 3.10): su apartado en `RESUMENES.md` y `SUMMARIES.md`, la tabla *Contents* del
-`README.md` y *What is different from the book* (añadir 3.6 sin barajar sobre CSV ordenado, 3.7 bug del jackknife+,
-3.8 bug de `k_error` y `Group` ≠ fuente).
+**Capítulo 4 — Classification** (https://dmol.pub/ml/classification.html). Notebook nuevo
+`notebooks/04_clasificacion.ipynb` (añadirlo al workspace con `python .jupyter/crear_workspace.py`).
+Contrastar el código oculto del libro (`ml/classification.ipynb` en whitead/dmol-book) como en el capítulo 3.
