@@ -2,6 +2,7 @@
 .ipynb_checkpoints/
 __pycache__/
 data/*.csv
+data/*.csv.gz
 figuras/
 
 # Solo para uso local (lanzador de macOS y workspace de Jupyter)
