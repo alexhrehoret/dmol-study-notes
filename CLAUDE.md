@@ -33,7 +33,8 @@ Seguimos el libro **Deep Learning for Molecules and Materials** (https://dmol.pu
 - `figuras/` — figuras exportadas.
 
 ## Entorno
-Env conda `dmol` (Python 3.11): numpy, pandas, matplotlib, seaborn, scikit-learn, rdkit, jax, jupyterlab.
+Env conda `dmol` (Python 3.11): numpy, pandas, matplotlib, seaborn, scikit-learn, rdkit, jax, jupyterlab,
+mordredcommunity (el Mordred original está abandonado; el fork se importa igual, `import mordred`).
 
 ```bash
 source /opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh && conda activate dmol
@@ -66,7 +67,8 @@ usar *small multiples* en vez de más colores.
 
 ## Detalles que difieren del libro
 - El libro hace `import dmol` solo para aplicar su estilo de gráficas; no lo usamos.
-- El libro descarga el CSV por URL en cada celda; nosotros leemos `data/curated-solubility-dataset.csv`.
+- El libro descarga el CSV por URL en cada celda; nosotros leemos `data/curated-solubility-dataset.csv`
+  (cap. 2–3) y `data/clintox.csv.gz` (cap. 4).
 - El libro es de 2021 y usa APIs retiradas. Ya encontrado: `sns.distplot` → `sns.histplot`.
 - `rdkit.Chem.rdMolDescriptors` hay que importarlo explícitamente (`from rdkit.Chem import rdMolDescriptors`).
 - El libro no fija semillas aleatorias. Nosotros **sí** (`sample(..., random_state=N)`,

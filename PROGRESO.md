@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1, 2 y 3 completos (siguiente: capítulo 4)** · Actualizado: 2026-09-24
+Estado: **Capítulos 1, 2 y 3 completos. Capítulo 4 en curso (siguiente: 4.3)** · Actualizado: 2026-09-25
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -38,7 +38,14 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 3.8 Training Data Distribution (leave-one-class-out, scaffold splits) (libro + bug de `k_error` + `Group` ≠ fuente + LOCO por fuente + qué hay en el test del scaffold split + error vs similitud)
   - [x] 3.9 Chapter Summary (tabla de las 9 ideas con nuestras cifras, hilo, diferencias con el código del libro, glosario)
   - [x] 3.10 Exercises — enunciados en `03_regresion.ipynb`, soluciones en `03_ejercicios_resueltos.ipynb`
-- [ ] 4. Classification ← siguiente
+- [ ] 4. Classification — `notebooks/04_clasificacion.ipynb`
+  - [x] Introducción (tipos de clasificación: binaria, multi-class, multi-label; dura vs blanda)
+  - [x] 4.1 Data (ClinTox) y 4.2 Running This Notebook (imports, `mordredcommunity`, carga y exploración)
+  - [ ] 4.3 Molecular Descriptors ← siguiente
+  - [ ] 4.4 Classification Models (perceptrón, sigmoide, entropía cruzada)
+  - [ ] 4.5 Classification Metrics (tipos de error, ROC, otras métricas)
+  - [ ] 4.6 Class Imbalance
+  - [ ] 4.7 Overfitting · 4.8 Chapter Summary · 4.9 Exercises
 - [ ] 5. Kernel Learning
 
 ## C. Deep Learning
@@ -299,8 +306,28 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 
 ---
 
+### 2026-09-25 — Enunciados en los notebooks de soluciones, y capítulo 4: intro, 4.1 y 4.2
+- `02_` y `03_ejercicios_resueltos.ipynb`: cada ejercicio empieza con su enunciado completo (celda
+  `> **Enunciado.**`, copiado del capítulo, sin pistas). Norma añadida a CLAUDE.md.
+- Cap. 4: `mordredcommunity` 2.0.7 instalado en `dmol` (conda-forge; solo añade networkx). `data/clintox.csv.gz`
+  descargado. Código del libro bajado (`ml/classification.ipynb`); ya visto para más adelante: `accuracy` usa
+  `yhat` en vez de `hard_yhat` (bug), split 80/20 **sin barajar** (test con 27 negativos de 296 = 9.1 % frente
+  a 5.7 % en train), pesos iniciales sin semilla.
+- ClinTox: 1484 moléculas, 94 no aprobadas (6.3 %). **Las 94 tienen `CT_TOX = 1`** → la label es "fracasó en
+  ensayos por toxicidad" (MoleculeNet: 2 tareas). Lenalidomida (aprobada 2005) está como no aprobada.
+- 4 SMILES ilegibles, todos aprobados: cisplatino `[NH4]` (valencia), sulfinpirazona, oxifenbutazona,
+  fenilbutazona (pirazolidinadiona escrita aromática, no kekuliza). Quedan 1480 (1386 / 94).
+- *Variante*: **atajo de formato**. 14 sales, todas no aprobadas; carga formal 64.1 % aprobadas vs 3.2 %;
+  aromáticas en minúscula 99 % vs 0 % (86 de 86 en Kekulé). Regla de texto "carga o minúsculas → aprobado":
+  exactitud 0.860, 85.3 % / 96.8 %. "Todo aprobado" 0.936. Las minúsculas no llegan a los descriptores
+  (RDKit aromatiza); cargas y sales sí → comprobar en 4.3. MolWt mediana 330 vs 413.
+
+---
+
 ## Punto de partida de la próxima sesión
 
-**Capítulo 4 — Classification** (https://dmol.pub/ml/classification.html). Notebook nuevo
-`notebooks/04_clasificacion.ipynb` (añadirlo al workspace con `python .jupyter/crear_workspace.py`).
-Contrastar el código oculto del libro (`ml/classification.ipynb` en whitead/dmol-book) como en el capítulo 3.
+**4.3 Molecular Descriptors** en `notebooks/04_clasificacion.ipynb` (añadir tras el resumen de 4.1–4.2).
+Calcular Mordred sobre las 1480 moléculas (cachear en `data/`, como `rdkit_descriptores.csv`), estandarizar
+como el libro (media/std de todo el dataset: fuga de información, comentarlo) y medir qué descriptores
+separan las clases solo por el formato (cargas, fragmentos). Código del libro en
+`gh api repos/whitead/dmol-book/contents/ml/classification.ipynb`.

@@ -70,7 +70,10 @@ compounds.* Scientific Data **2019**, 6, 143. <https://doi.org/10.1038/s41597-01
   1.87 in nested cross-validation (vs 2.79 for the book's model) and 4.13 on a scaffold split (vs
   5.49). Without clipping, the same descriptors do worse than predicting the mean.
 - **Looking at the data.** For example, AqSolDB contains 573 mixtures whose descriptors are summed,
-  and 400 molecules (mostly salts) with a spurious `BalabanJ = 0`.
+  and 400 molecules (mostly salts) with a spurious `BalabanJ = 0`. In ClinTox the two classes were
+  written differently: all 14 salts are "not approved", 64 % of approved drugs carry formal charges
+  vs 3 % of the rest, and aromatic rings are lowercase in 99 % of approved drugs and in none of the
+  others. A rule that only reads the SMILES text gets 86 % accuracy.
 
 ## Contents
 
@@ -79,7 +82,7 @@ compounds.* Scientific Data **2019**, 6, 143. <https://doi.org/10.1038/s41597-01
 | 1. Tensors and Shapes | [`01_tensores.ipynb`](notebooks/01_tensores.ipynb) | ✅ |
 | 2. Introduction to Machine Learning | [`02_introduccion.ipynb`](notebooks/02_introduccion.ipynb) · [exercises solved](notebooks/02_ejercicios_resueltos.ipynb) | ✅ |
 | 3. Regression & Model Assessment | [`03_regresion.ipynb`](notebooks/03_regresion.ipynb) · [exercises solved](notebooks/03_ejercicios_resueltos.ipynb) | ✅ |
-| 4. Classification | — | next |
+| 4. Classification | [`04_clasificacion.ipynb`](notebooks/04_clasificacion.ipynb) | in progress (4.1–4.2) |
 | 5–22 | — | to do |
 
 - **[SUMMARIES.md](SUMMARIES.md)** — the core lessons of each finished chapter, in English, on one
