@@ -25,8 +25,9 @@ Seguimos el libro **Deep Learning for Molecules and Materials** (https://dmol.pu
 
 ## Estructura
 - `notebooks/` — un notebook por capítulo. Nomenclatura: `NN_nombre.ipynb` para el capítulo y
-  `NN_ejercicios_resueltos.ipynb` para sus soluciones (los enunciados sin resolver se quedan en
-  el notebook del capítulo).
+  `NN_ejercicios_resueltos.ipynb` para sus soluciones (los enunciados sin resolver, con pistas, se
+  quedan en el notebook del capítulo). En el de soluciones, cada ejercicio empieza con una celda con
+  su enunciado completo copiado del capítulo (cita `> **Enunciado.** ...`, sin las pistas).
 - `data/` — datasets descargados una sola vez y cacheados en local (no re-descargar desde el notebook).
 - `src/` — funciones reutilizables entre capítulos (featurizers, métricas, plots).
 - `figuras/` — figuras exportadas.
