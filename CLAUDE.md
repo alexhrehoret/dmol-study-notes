@@ -26,6 +26,11 @@ Seguimos el libro **Deep Learning for Molecules and Materials** (https://dmol.pu
   hacerlo bien y en qué notebook lo mostramos. Los vistos en el código pero aún sin medir van en
   *Pendientes de comprobar* hasta que lleguemos a su sección. Verificar contra la fuente del libro antes
   de escribir la entrada.
+- **Cada apartado empieza con el contexto limpio** (el usuario hace `/clear` entre apartados). Al terminar
+  uno, sin que lo pida: commit + push, y dejar en `PROGRESO.md` (*Punto de partida de la próxima sesión*)
+  todo lo necesario para retomarlo sin la conversación: qué sección toca, dónde insertar, qué hace el código
+  del libro, qué variables del notebook hay disponibles, qué hay que medir (pendientes de `ERRATAS.md`) y
+  cifras de borradores previos. La scratchpad no sobrevive al clear.
 - **Una idea por celda de markdown.** No juntar el cierre de una sección con el encabezado de la
   siguiente: rompe la posibilidad de insertar contenido después sin descolocarlo.
 

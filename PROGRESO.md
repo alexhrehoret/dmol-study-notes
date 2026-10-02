@@ -357,9 +357,28 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 
 ## Punto de partida de la próxima sesión
 
-**4.4 Classification Models** en `notebooks/04_clasificacion.ipynb` (añadir tras el resumen de 4.3). Perceptrón con
-MAE y por qué su gradiente es 0, sigmoide y entropía cruzada, con los 483 descriptores (`features`, `labels`).
-Pendiente del libro: `accuracy` usa `yhat` en vez de `hard_yhat`; split 80/20 **sin barajar** (test 9.1 % negativos
-frente a 5.7 %); pesos iniciales sin semilla; estandarización con todo el dataset (10 columnas constantes en train).
-Variante prevista: el mismo clasificador con `raw_norm` (moléculas normalizadas) para medir el atajo. Código del libro
-en `gh api repos/whitead/dmol-book/contents/ml/classification.ipynb`.
+**4.4 Classification Models** en `notebooks/04_clasificacion.ipynb`. Añadir celdas al final, tras `### Resumen de 4.3`
+(hoy la última, índice 35). Al ejecutarlo de arriba abajo, las cachés de Mordred ya existen y tarda poco.
+
+**Qué hay en el libro** (`ml/classification.ipynb`, celdas 13–25; bajarlo de nuevo con
+`gh api repos/whitead/dmol-book/contents/ml/classification.ipynb -H "Accept: application/vnd.github.raw"` a la
+scratchpad, que no sobrevive entre sesiones): *Linear Perceptron*: `perceptron` con `jnp.where`, pérdida MAE y
+por qué su gradiente es 0 (función escalón); luego sigmoide + entropía cruzada y entrenamiento por batches
+(`batch_size = 32`, `train_N = int(len(labels) * 0.8)`, pesos `np.random.normal(scale=0.01)` sin semilla).
+La función `accuracy` (bug P-1) ya es de 4.5 (celda 27).
+
+**Variables del notebook que usará 4.4**: `features` (483 columnas estandarizadas como el libro), `labels`
+(Series, 1 = aprobado), `y` (array), `raw_features` (1613 sin estandarizar), `raw_norm` / `features_norm`
+(moléculas normalizadas, 1613 / 541 columnas), `valid_mols`, `norm_mols`, `data` (smiles, FDA_APPROVED, MolWt...).
+
+**Cosas a medir en 4.4** (y luego pasarlas de *Pendientes* a su capítulo en `ERRATAS.md` / `ERRATA.md`):
+- P-2: reparto 80/20 sin barajar (test 27/296 = 9.1 % negativos frente a 5.7 % en train). Reproducir el del libro
+  y luego *variante*: `train_test_split(stratify=y, random_state=4)`.
+- Semilla en los pesos iniciales (G-1). Estandarizar solo con train (4.3-b; quitar las 10 columnas constantes).
+- *Variante* del atajo: mismo clasificador con `raw_norm`. Avance de borrador (sklearn, regresión logística,
+  5-fold estratificado): AUC ≈ 0.84 originales frente a 0.68–0.75 normalizadas. El AUC llega en 4.5: en 4.4
+  quizá solo exactitud/pérdida, y dejar la comparación completa para 4.5.
+
+**Flujo** (ver memoria *flujo-notebooks-dmol*): script de fase 1 con código + marcadores `<<INTERP_...>>`, ejecutar
+con `jupyter nbconvert --execute --inplace` desde `notebooks/`, leer salidas, fase 2 con el texto. Después:
+PROGRESO, ERRATAS/ERRATA, README (fila del cap. 4), commit + push, y dejar este apartado listo para el siguiente.
