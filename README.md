@@ -50,7 +50,9 @@ compounds.* Scientific Data **2019**, 6, 143. <https://doi.org/10.1038/s41597-01
 - **Updated to current library versions** (the book dates from 2021; e.g. `sns.distplot` →
   `sns.histplot`).
 - **Hidden code checked.** Several figures in the book come from cells hidden on the website. I
-  pulled them from the source repository and compared them with the text. Some things I found:
+  pulled them from the source repository and compared them with the text. The full list, with where
+  each issue is, what goes wrong and how it should be done, is in [`ERRATA.md`](ERRATA.md) (Spanish:
+  [`ERRATAS.md`](ERRATAS.md)). Some things I found:
   - **3.3** — the 17 descriptors have rank 16 (`RingCount = NumAromaticRings + NumAliphaticRings`),
     which is why the book's curves go flat at 16–17 features.
   - **3.4** — the training set is sampled *with replacement* (about 8 distinct points out of 10),

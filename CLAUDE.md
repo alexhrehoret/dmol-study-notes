@@ -20,6 +20,12 @@ Seguimos el libro **Deep Learning for Molecules and Materials** (https://dmol.pu
   capítulo: actualizar la tabla *Contents* del `README.md` (y *What is different from the book* si
   hay hallazgos nuevos). Los notebooks siguen en español; traducir uno a `notebooks_en/` solo si se
   pide, y solo con el capítulo cerrado.
+- **Erratas del libro**: cada fallo o puntualización del libro (código, texto o dataset) que encontremos
+  se añade a `ERRATAS.md` (español) **y** `ERRATA.md` (inglés) en la misma sesión: ID por sección, tipo
+  (`bug`/`método`/`texto`/`datos`/`API`), impacto, dónde está, qué pasa, efecto con nuestras cifras, cómo
+  hacerlo bien y en qué notebook lo mostramos. Los vistos en el código pero aún sin medir van en
+  *Pendientes de comprobar* hasta que lleguemos a su sección. Verificar contra la fuente del libro antes
+  de escribir la entrada.
 - **Una idea por celda de markdown.** No juntar el cierre de una sección con el encabezado de la
   siguiente: rompe la posibilidad de insertar contenido después sin descolocarlo.
 

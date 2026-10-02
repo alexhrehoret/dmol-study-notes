@@ -142,7 +142,7 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 - *Variante propia*: 8 semillas. Hay brecha en todas; 7/8 con mínimo temprano (la 1 no sobreajusta en
   2000 pasos); en 3/8 el modelo final es peor que la media. RMSE de test entre 1.17 y 3.93 según el
   sorteo → gancho a la validación cruzada (3.6).
-- Nota: `jax.example_libraries.optimizers` lo importa el libro pero no lo usa; omitido.
+- Nota: `jax.example_libraries.optimizers` solo lo usa el código oculto de 3.5 (ridge con Adam); omitido (corregido el 2026-10-02: antes decía "no lo usa").
 
 ### 2026-09-16 — Capítulo 3: 3.2.1 y 3.2.2 (overfitting con datos sintéticos)
 - $f(x) = x^3 - x^2 + x - 1$, 20 puntos; train = 10 de los extremos, test = 10 del centro (sin ruido).
@@ -342,6 +342,16 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 - Avance hecho en borrador (no está en el notebook, comprobar en 4.4–4.5): regresión logística 5-fold estratificado,
   AUC **≈ 0.84** con descriptores originales frente a **≈ 0.68–0.75** con moléculas normalizadas → el modelo sí
   combina el atajo.
+
+---
+
+### 2026-10-02 — Registro de erratas del libro
+- `ERRATAS.md` / `ERRATA.md` (es/en): 23 entradas (1 general + caps. 2–4) + 2 pendientes de 4.4–4.5 (P-1 `accuracy`,
+  P-2 reparto sin barajar). Formato: ID, tipo, impacto, dónde, qué pasa, efecto, cómo hacerlo, notebook. Norma en
+  CLAUDE.md; enlazado desde el README.
+- Al verificar contra la fuente: `optimizers` **sí** lo usa el código oculto de 3.5 (`adam_fit`). Corregida la
+  frase de `03_regresion.ipynb` (imports de 3.1) que decía que ninguna celda lo usaba.
+- Al cerrar 4.4–4.5: pasar P-1 y P-2 a su capítulo con cifras.
 
 ---
 
