@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1, 2 y 3 completos. Capítulo 4 en curso (siguiente: 4.3)** · Actualizado: 2026-09-25
+Estado: **Capítulos 1, 2 y 3 completos. Capítulo 4 en curso (siguiente: 4.4)** · Actualizado: 2026-10-02
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -41,8 +41,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
 - [ ] 4. Classification — `notebooks/04_clasificacion.ipynb`
   - [x] Introducción (tipos de clasificación: binaria, multi-class, multi-label; dura vs blanda)
   - [x] 4.1 Data (ClinTox) y 4.2 Running This Notebook (imports, `mordredcommunity`, carga y exploración)
-  - [ ] 4.3 Molecular Descriptors ← siguiente
-  - [ ] 4.4 Classification Models (perceptrón, sigmoide, entropía cruzada)
+  - [x] 4.3 Molecular Descriptors (libro: 483 features + por qué se pierden 1130 + fuga al estandarizar + atajo en los descriptores)
+  - [ ] 4.4 Classification Models (perceptrón, sigmoide, entropía cruzada) ← siguiente
   - [ ] 4.5 Classification Metrics (tipos de error, ROC, otras métricas)
   - [ ] 4.6 Class Imbalance
   - [ ] 4.7 Overfitting · 4.8 Chapter Summary · 4.9 Exercises
@@ -324,10 +324,32 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 
 ---
 
+### 2026-10-02 — Capítulo 4: 4.3 (descriptores Mordred)
+- Mordred: 1826 descriptores, **1613 sin 3D**. `calc.pandas(..., nproc=1)` porque el multiproceso falla en macOS
+  (`EOFError` al arrancar el `Manager`); ~107 s. Cachés `data/mordred_clintox.csv` y `data/mordred_clintox_normalizadas.csv`.
+- Libro reproducido exacto: **483 features**. 10.3 % de casillas vacías; las 1480 moléculas tienen algún `NaN`.
+- *Variante*: de 1130 columnas tiradas, solo **113 constantes** (el comentario del libro "std = 0" explica el 10 %);
+  1017 con `NaN` de origen. La fila 0 (comodín `*`: sin masa, vdW, EN) borra **147** columnas ella sola; `[Se]` 18.
+  Sin la fila del `*` → 630 features.
+- *Variante* fuga (reparto del libro, primeras 1184 = train): media se mueve 0.016 std (mediana), máx. 0.095; std ×1.003.
+  **10 descriptores constantes en train** (0), distintos en 1 molécula de test cada uno: tetrofosmina (P), disiloxano (Si),
+  As₂O₃ (As, `n5F*Ring`). Estandarizados como el libro: −0.026 en train, **38.44** en test.
+- *Variante* atajo: `LargestFragmentChooser` + `Uncharger`. Cargas aprobadas 64.1 % → 6.9 %, no aprobadas 3.2 % → 2.1 %.
+  541 features tras normalizar. 323/483 descriptores cambian; 814/1386 aprobadas y 14/94 no aprobadas.
+  Separación univariante (AUC, max(p, 1−p)): mejor 0.749 (`SMR_VSA3` = superficie de N neutros). Pierden al normalizar
+  `SLogP` 0.630 → 0.542, `SsssN` 0.636 → 0.554, `SMR_VSA3` → 0.690. **`BalabanJ` ≈ 0 (≤ 4.3e-6) en las 14 sales**,
+  resto ≥ 0.97. > 0.6: 157/483 → 193/541. Atajo repartido, no concentrado.
+- Avance hecho en borrador (no está en el notebook, comprobar en 4.4–4.5): regresión logística 5-fold estratificado,
+  AUC **≈ 0.84** con descriptores originales frente a **≈ 0.68–0.75** con moléculas normalizadas → el modelo sí
+  combina el atajo.
+
+---
+
 ## Punto de partida de la próxima sesión
 
-**4.3 Molecular Descriptors** en `notebooks/04_clasificacion.ipynb` (añadir tras el resumen de 4.1–4.2).
-Calcular Mordred sobre las 1480 moléculas (cachear en `data/`, como `rdkit_descriptores.csv`), estandarizar
-como el libro (media/std de todo el dataset: fuga de información, comentarlo) y medir qué descriptores
-separan las clases solo por el formato (cargas, fragmentos). Código del libro en
-`gh api repos/whitead/dmol-book/contents/ml/classification.ipynb`.
+**4.4 Classification Models** en `notebooks/04_clasificacion.ipynb` (añadir tras el resumen de 4.3). Perceptrón con
+MAE y por qué su gradiente es 0, sigmoide y entropía cruzada, con los 483 descriptores (`features`, `labels`).
+Pendiente del libro: `accuracy` usa `yhat` en vez de `hard_yhat`; split 80/20 **sin barajar** (test 9.1 % negativos
+frente a 5.7 %); pesos iniciales sin semilla; estandarización con todo el dataset (10 columnas constantes en train).
+Variante prevista: el mismo clasificador con `raw_norm` (moléculas normalizadas) para medir el atajo. Código del libro
+en `gh api repos/whitead/dmol-book/contents/ml/classification.ipynb`.

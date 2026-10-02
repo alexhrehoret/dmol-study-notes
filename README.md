@@ -82,7 +82,7 @@ compounds.* Scientific Data **2019**, 6, 143. <https://doi.org/10.1038/s41597-01
 | 1. Tensors and Shapes | [`01_tensores.ipynb`](notebooks/01_tensores.ipynb) | ✅ |
 | 2. Introduction to Machine Learning | [`02_introduccion.ipynb`](notebooks/02_introduccion.ipynb) · [exercises solved](notebooks/02_ejercicios_resueltos.ipynb) | ✅ |
 | 3. Regression & Model Assessment | [`03_regresion.ipynb`](notebooks/03_regresion.ipynb) · [exercises solved](notebooks/03_ejercicios_resueltos.ipynb) | ✅ |
-| 4. Classification | [`04_clasificacion.ipynb`](notebooks/04_clasificacion.ipynb) | in progress (4.1–4.2) |
+| 4. Classification | [`04_clasificacion.ipynb`](notebooks/04_clasificacion.ipynb) | in progress (4.1–4.3) |
 | 5–22 | — | to do |
 
 - **[SUMMARIES.md](SUMMARIES.md)** — the core lessons of each finished chapter, in English, on one
