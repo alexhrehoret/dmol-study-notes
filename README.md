@@ -67,6 +67,12 @@ compounds.* Scientific Data **2019**, 6, 143. <https://doi.org/10.1038/s41597-01
     values (93.3 % once fixed).
   - **3.8** — the leave-one-class-out loop never resets its error list (the site prints 50.33; the
     real value is 3.20), and the `Group` column is AqSolDB's reliability group, not the data source.
+  - **4.4** — the train/test split takes the last 20 % of an alphabetically sorted CSV, where 15 of
+    the 22 carbon-free drugs end up (As₂O₃, ²⁰¹TlCl, I₂...). On that test set the classifier never
+    beats the trivial "predict the class ratio" baseline (cross-entropy 0.479 vs 0.315), although the
+    text calls it well trained. With a stratified random split it does beat it, narrowly, but only
+    thanks to the SMILES-format shortcut: on normalized molecules it stays at the baseline (0.246 vs
+    0.238).
 - **Exercises solved with extra analysis.** For example, chapter 3's "best linear model": ridge on
   204 RDKit descriptors clipped to the training range plus Morgan count fingerprints reaches MSE
   1.87 in nested cross-validation (vs 2.79 for the book's model) and 4.13 on a scaffold split (vs
@@ -84,7 +90,7 @@ compounds.* Scientific Data **2019**, 6, 143. <https://doi.org/10.1038/s41597-01
 | 1. Tensors and Shapes | [`01_tensores.ipynb`](notebooks/01_tensores.ipynb) | ✅ |
 | 2. Introduction to Machine Learning | [`02_introduccion.ipynb`](notebooks/02_introduccion.ipynb) · [exercises solved](notebooks/02_ejercicios_resueltos.ipynb) | ✅ |
 | 3. Regression & Model Assessment | [`03_regresion.ipynb`](notebooks/03_regresion.ipynb) · [exercises solved](notebooks/03_ejercicios_resueltos.ipynb) | ✅ |
-| 4. Classification | [`04_clasificacion.ipynb`](notebooks/04_clasificacion.ipynb) | in progress (4.1–4.3) |
+| 4. Classification | [`04_clasificacion.ipynb`](notebooks/04_clasificacion.ipynb) | in progress (4.1–4.4) |
 | 5–22 | — | to do |
 
 - **[SUMMARIES.md](SUMMARIES.md)** — the core lessons of each finished chapter, in English, on one

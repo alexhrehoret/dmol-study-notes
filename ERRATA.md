@@ -46,8 +46,11 @@ repository (`github.com/whitead/dmol-book`, folder `ml/`), which includes the ce
 | [4.2-b](#42-b) | 4.2 | `data` | high | the two classes are written differently (shortcut) |
 | [4.3-a](#43-a) | 4.3 | `text` | medium | the `NaN`s do not come from std = 0 |
 | [4.3-b](#43-b) | 4.3 | `method` | medium | standardizes before splitting (data leakage) |
-| [P-1](#p-1) | 4.4–4.5 | `bug` | ? | `accuracy` uses `yhat` instead of `hard_yhat` |
-| [P-2](#p-2) | 4.4 | `method` | ? | 80/20 split with no shuffling or stratification |
+| [4.4-a](#44-a) | 4.4 | `method` | high | unshuffled 80/20 split of an alphabetically sorted CSV |
+| [4.4-b](#44-b) | 4.4 | `text` | high | calls the model well trained without comparing it to a baseline |
+| [4.4-c](#44-c) | 4.4 | `bug` | low | the loop skips the last training batch |
+| [4.4-d](#44-d) | 4.4 | `text` | low | $\vec w\cdot\vec x + b$ is proportional to the distance to the boundary, not the distance |
+| [P-1](#p-1) | 4.5 | `bug` | ? | `accuracy` uses `yhat` instead of `hard_yhat` |
 
 ---
 
@@ -62,7 +65,9 @@ repository (`github.com/whitead/dmol-book`, folder `ml/`), which includes the ce
   3.93 depending on the draw.
 - **How to do it**: fix the seed (`sample(..., random_state=N)`, `rng = np.random.default_rng(N)`). If the
   conclusion depends on the seed, show several.
-- **In our notebooks**: every cell is seeded; 3.2 and 3.2.1 compare 8 and 10 seeds.
+- **In our notebooks**: every cell is seeded; 3.2 and 3.2.1 compare 8 and 10 seeds. In 4.4, 3 seeds for the
+  initial weights in each split: they change the test loss by at most 0.055, slightly less than the split does
+  (0.170–0.230 across 5 stratified splits).
 
 ## Chapter 2 — Introduction to ML
 
@@ -302,7 +307,10 @@ repository (`github.com/whitead/dmol-book`, folder `ml/`), which includes the ce
   matches the label: a **shortcut**.
 - **Effect**: on the Mordred descriptors, normalizing the molecules changes 323 of the 483 descriptors in
   58.7 % of approved drugs. `SLogP` drops from 0.630 to 0.542 class separation, and `BalabanJ` ≈ 0 flags the
-  14 salts. The effect on the classifier will be measured in 4.4–4.5.
+  14 salts. In the 4.4 classifier (5 stratified splits), the test loss is 0.199 with the original molecules
+  and **0.246** with the normalized ones, against a baseline of 0.238: **without the shortcut, the model does
+  not beat the constant model**. The 6 protonated-amine columns (`NsNH3`, `SsssNH`...) alone account for 0.014
+  of the advantage. AUC will be measured in 4.5.
 - **How to do it**: normalize molecules before computing descriptors (`rdMolStandardize`:
   `LargestFragmentChooser` + `Uncharger`) and check that the model does not learn the source.
 - **In our notebooks**: `04_clasificacion.ipynb`, 4.2 and 4.3.
@@ -327,28 +335,72 @@ repository (`github.com/whitead/dmol-book`, folder `ml/`), which includes the ce
   training set. Here it barely moves the numbers (the mean, 0.016 std at the median), but it hides **10
   descriptors that are constant in the training set** and take the value **38.44** in one test molecule
   (outside the training range).
+- **Effect in 4.4**: with the book's split, standardizing with the training set only leaves the test loss
+  almost unchanged (0.500 vs 0.503, mean of 3 seeds): that test set has a different problem ([4.4-a](#44-a)).
 - **How to do it**: split first; compute mean and std on the training set only (`StandardScaler().fit(X_train)`),
   and drop columns that are constant in the training set.
 - **In our notebooks**: `04_clasificacion.ipynb`, 4.3.
+
+<a id="44-a"></a>
+### 4.4-a · Unshuffled 80/20 split of an alphabetically sorted CSV · `method` · high
+
+- **Where**: 4.4: `train_N = int(len(labels) * 0.8)`; `test_x = features[train_N:]`.
+- **What happens**: the ClinTox CSV is almost in alphabetical order by SMILES (93.0 % of consecutive rows), so
+  the test set is the SMILES from `CCCC...` to `S=[Se]=S`. It has 27 not approved (9.1 %, vs 5.7 % in the
+  training set) and **15 of the 22 carbon-free molecules** (metal chlorides and oxides, As₂O₃, ²⁰¹TlCl, I₂,
+  SeS₂). The initial weights (`np.random.normal`) are not seeded either ([G-1](#g-1)).
+- **Effect**: the model does not beat the baseline of predicting the class ratio (test loss 0.479 vs 0.315).
+  Four approved inorganic compounds, given p ≤ 0.001 by the model, account for **34.7 %** of the loss. With a
+  stratified random split (5 splits), the same model beats the baseline in all 5: 0.170–0.230 vs 0.238.
+- **How to do it**: `train_test_split(X, y, test_size=0.2, stratify=y, random_state=N)`, which shuffles and
+  preserves the class ratio. If the goal is to measure extrapolation to different chemistry, do it on purpose
+  (e.g. with a scaffold split, as in 3.8).
+- **In our notebooks**: `04_clasificacion.ipynb`, 4.4.
+
+<a id="44-b"></a>
+### 4.4-b · Calls the model well trained without a baseline · `text` · high
+
+- **Where**: 4.4, after the training curve: "We are making good progress with our classifier, as judged from
+  testing loss. [...] We have a reasonably well-trained model."
+- **What happens**: the curve is not compared with anything. The minimum reference is the constant model that
+  predicts the training class ratio: cross-entropy 0.315 on that test set.
+- **Effect**: the test loss never goes below that line (minimum 0.369, final 0.479) and ends worse than with the
+  initial weights, before training (0.394). On the training set it does beat it (0.126 vs 0.217): overfitting.
+  The "good progress" is the recovery after the first steps (1.076 after the first one).
+- **How to do it**: always plot the constant model's loss next to the curve (in regression, predicting the
+  mean).
+- **In our notebooks**: `04_clasificacion.ipynb`, 4.4.
+
+<a id="44-c"></a>
+### 4.4-c · The loop skips the last batch · `bug` · low
+
+- **Where**: 4.4: `batch_idx = range(0, train_N, batch_size)` and `for i in range(len(batch_idx) - 1):`.
+- **What happens**: `batch_idx` has 37 start points (0 to 1152) and the loop runs 36 batches, so the one
+  starting at 1152 is never run. The 32 molecules in rows 1152–1183 are never used. Same kind of bug as
+  [3.6-b](#36-b).
+- **How to do it**: `for start in range(0, train_N, batch_size): x = X[start:start + batch_size]`, which
+  includes the last batch even if it is incomplete.
+- **In our notebooks**: `04_clasificacion.ipynb`, 4.4 (the `entrenar` function uses every batch).
+
+<a id="44-d"></a>
+### 4.4-d · $\vec w\cdot\vec x + b$ is not the distance to the boundary · `text` · low
+
+- **Where**: 4.4, *Linear Perceptron*: "The term $\vec{w}\cdot \vec{x} + b$ is called distance from the
+  decision boundary".
+- **What happens**: it is proportional to the (signed) distance; the geometric distance is
+  $(\vec w\cdot\vec x + b)/\lVert\vec w\rVert$. Same boundary with weights twice as large gives twice the
+  "distance". The "confidence" idea still holds.
+- **In our notebooks**: `04_clasificacion.ipynb`, 4.4.
 
 ## To be checked
 
 Seen in the book's code, but their effect has not yet been measured in our notebooks.
 
 <a id="p-1"></a>
-### P-1 · `accuracy` uses `yhat` instead of `hard_yhat` · `bug` · to be measured (4.4–4.5)
+### P-1 · `accuracy` uses `yhat` instead of `hard_yhat` · `bug` · to be measured (4.5)
 
 - **Where**: `def accuracy(y, yhat)`: computes `hard_yhat = np.where(yhat > 0.5, ...)` and then uses
   `np.sum(np.abs(y - yhat))`.
 - **What happens**: `hard_yhat` is never used. The function returns $1 - \text{mean}|y - p|$, a "soft accuracy"
   that depends on the probabilities, not the fraction of correct predictions.
 - **How to do it**: `np.mean(hard_yhat == y)`, or `sklearn.metrics.accuracy_score`.
-
-<a id="p-2"></a>
-### P-2 · 80/20 split with no shuffling or stratification · `method` · to be measured (4.4)
-
-- **Where**: `train_N = int(len(labels) * 0.8)`; `test_x = features[train_N:]`.
-- **What happens**: the test set is the last 296 rows of the CSV: 27 not approved (9.1 %), vs 5.7 % in the
-  training set. The initial weights (`np.random.normal`) are not seeded either ([G-1](#g-1)).
-- **How to do it**: `train_test_split(X, y, test_size=0.2, stratify=y, random_state=N)`, which shuffles and
-  preserves the class ratio.

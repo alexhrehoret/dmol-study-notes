@@ -46,8 +46,11 @@ fuente (`github.com/whitead/dmol-book`, carpeta `ml/`), que incluye las celdas o
 | [4.2-b](#42-b) | 4.2 | `datos` | alto | las dos clases están escritas de forma distinta (atajo) |
 | [4.3-a](#43-a) | 4.3 | `texto` | medio | los `NaN` no vienen de std = 0 |
 | [4.3-b](#43-b) | 4.3 | `método` | medio | estandariza antes de repartir (fuga de información) |
-| [P-1](#p-1) | 4.4–4.5 | `bug` | ? | `accuracy` usa `yhat` en vez de `hard_yhat` |
-| [P-2](#p-2) | 4.4 | `método` | ? | reparto 80/20 sin barajar ni estratificar |
+| [4.4-a](#44-a) | 4.4 | `método` | alto | reparto 80/20 sin barajar sobre un CSV en orden alfabético |
+| [4.4-b](#44-b) | 4.4 | `texto` | alto | da el modelo por bien entrenado sin compararlo con un listón |
+| [4.4-c](#44-c) | 4.4 | `bug` | bajo | el bucle se salta el último batch del train |
+| [4.4-d](#44-d) | 4.4 | `texto` | bajo | $\vec w\cdot\vec x + b$ es proporcional a la distancia a la frontera, no la distancia |
+| [P-1](#p-1) | 4.5 | `bug` | ? | `accuracy` usa `yhat` en vez de `hard_yhat` |
 
 ---
 
@@ -63,6 +66,8 @@ fuente (`github.com/whitead/dmol-book`, carpeta `ml/`), que incluye las celdas o
 - **Cómo hacerlo**: fijar la semilla (`sample(..., random_state=N)`, `rng = np.random.default_rng(N)`). Si la
   conclusión depende de la semilla, enseñar varias.
 - **En nuestros notebooks**: todas las celdas llevan semilla; en 3.2 y 3.2.1, comparación con 8 y 10 semillas.
+  En 4.4, 3 semillas de los pesos iniciales en cada reparto: cambian la pérdida de test como mucho 0.055, algo
+  menos que el reparto (0.170–0.230 entre 5 repartos estratificados).
 
 ## Capítulo 2 — Introducción al ML
 
@@ -304,7 +309,10 @@ fuente (`github.com/whitead/dmol-book`, carpeta `ml/`), que incluye las celdas o
   96.8 % de los fracasos. La fuente coincide con la label: un **atajo**.
 - **Efecto**: en los descriptores Mordred, normalizar las moléculas cambia 323 de los 483 descriptores en el
   58.7 % de las aprobadas. `SLogP` pasa de 0.630 a 0.542 de separación, y `BalabanJ` ≈ 0 marca las 14 sales.
-  El efecto en el clasificador se medirá en 4.4–4.5.
+  En el clasificador de 4.4 (5 repartos estratificados), la pérdida de test es 0.199 con las moléculas
+  originales y **0.246** con las normalizadas, frente a un listón de 0.238: **sin el atajo, el modelo no supera
+  al modelo constante**. Las 6 columnas de aminas protonadas (`NsNH3`, `SsssNH`...) aportan solas 0.014 de la
+  ventaja. El AUC se medirá en 4.5.
 - **Cómo hacerlo**: normalizar las moléculas antes de calcular descriptores (`rdMolStandardize`:
   `LargestFragmentChooser` + `Uncharger`) y comprobar que el modelo no aprende la fuente.
 - **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.2 y 4.3.
@@ -328,28 +336,73 @@ fuente (`github.com/whitead/dmol-book`, carpeta `ml/`), que incluye las celdas o
 - **Qué pasa**: **fuga de información**: el test contribuye a la media y la std con las que se transforma el
   train. Aquí mueve poco las cifras (la media, 0.016 std en mediana), pero esconde **10 descriptores
   constantes en el train** que en una molécula de test valen **38.44** (fuera del rango del train).
+- **Efecto en 4.4**: con el reparto del libro, estandarizar solo con el train deja la pérdida de test casi igual
+  (0.500 frente a 0.503, media de 3 semillas): el problema de ese test es otro ([4.4-a](#44-a)).
 - **Cómo hacerlo**: repartir primero; calcular media y std solo con el train
   (`StandardScaler().fit(X_train)`), y quitar las columnas constantes en el train.
 - **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.3.
+
+<a id="44-a"></a>
+### 4.4-a · Reparto 80/20 sin barajar sobre un CSV en orden alfabético · `método` · alto
+
+- **Dónde**: 4.4: `train_N = int(len(labels) * 0.8)`; `test_x = features[train_N:]`.
+- **Qué pasa**: el CSV de ClinTox está casi en orden alfabético por el SMILES (el 93.0 % de las filas
+  consecutivas), así que el test son los SMILES de `CCCC...` a `S=[Se]=S`. Tiene 27 no aprobadas (9.1 %, frente
+  al 5.7 % del train) y **15 de las 22 moléculas sin carbono** (cloruros y óxidos metálicos, As₂O₃, ²⁰¹TlCl, I₂,
+  SeS₂). Los pesos iniciales (`np.random.normal`) tampoco tienen semilla ([G-1](#g-1)).
+- **Efecto**: el modelo no supera al listón de predecir la proporción de clases (pérdida de test 0.479 frente a
+  0.315). Cuatro inorgánicos aprobados, a los que el modelo da p ≤ 0.001, aportan el **34.7 %** de la pérdida.
+  Con un reparto estratificado al azar (5 repartos), el mismo modelo sí supera al listón en los 5: 0.170–0.230
+  frente a 0.238.
+- **Cómo hacerlo**: `train_test_split(X, y, test_size=0.2, stratify=y, random_state=N)`, que baraja y conserva
+  la proporción de clases. Si lo que se quiere es medir la extrapolación a química distinta, hacerlo a propósito
+  (por ejemplo, con un scaffold split, como en 3.8).
+- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.4.
+
+<a id="44-b"></a>
+### 4.4-b · Da el modelo por bien entrenado sin un listón · `texto` · alto
+
+- **Dónde**: 4.4, tras la curva de entrenamiento: "We are making good progress with our classifier, as judged
+  from testing loss. [...] We have a reasonably well-trained model."
+- **Qué pasa**: la curva no se compara con nada. La referencia mínima es el modelo constante que predice la
+  proporción de clases del train: entropía cruzada 0.315 en ese test.
+- **Efecto**: la pérdida de test no baja nunca de esa línea (mínima 0.369, final 0.479) y termina peor que con
+  los pesos iniciales, antes de entrenar (0.394). En el train sí la supera (0.126 frente a 0.217): sobreajuste.
+  La "buena progresión" es la recuperación tras los primeros pasos (1.076 después del primero).
+- **Cómo hacerlo**: dibujar siempre la pérdida del modelo constante junto a la curva (en regresión, la de
+  predecir la media).
+- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.4.
+
+<a id="44-c"></a>
+### 4.4-c · El bucle se salta el último batch · `bug` · bajo
+
+- **Dónde**: 4.4: `batch_idx = range(0, train_N, batch_size)` y `for i in range(len(batch_idx) - 1):`.
+- **Qué pasa**: `batch_idx` tiene 37 inicios (de 0 a 1152) y el bucle hace 36 batches, así que el que empieza en
+  1152 no se hace. Las 32 moléculas de las filas 1152–1183 no se usan nunca. Es el mismo tipo de fallo que
+  [3.6-b](#36-b).
+- **Cómo hacerlo**: `for start in range(0, train_N, batch_size): x = X[start:start + batch_size]`, que incluye
+  el último batch aunque esté incompleto.
+- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.4 (la función `entrenar` usa todos los batches).
+
+<a id="44-d"></a>
+### 4.4-d · $\vec w\cdot\vec x + b$ no es la distancia a la frontera · `texto` · bajo
+
+- **Dónde**: 4.4, *Linear Perceptron*: "The term $\vec{w}\cdot \vec{x} + b$ is called distance from the
+  decision boundary".
+- **Qué pasa**: es proporcional a la distancia (con signo); la distancia geométrica es
+  $(\vec w\cdot\vec x + b)/\lVert\vec w\rVert$. Con la misma frontera y los pesos el doble de grandes, la
+  "distancia" sale el doble. La idea de "confianza" no cambia.
+- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.4.
 
 ## Pendientes de comprobar
 
 Vistos en el código del libro, pero aún sin medir su efecto en nuestros notebooks.
 
 <a id="p-1"></a>
-### P-1 · `accuracy` usa `yhat` en vez de `hard_yhat` · `bug` · por medir (4.4–4.5)
+### P-1 · `accuracy` usa `yhat` en vez de `hard_yhat` · `bug` · por medir (4.5)
 
 - **Dónde**: `def accuracy(y, yhat)`: calcula `hard_yhat = np.where(yhat > 0.5, ...)` y luego usa
   `np.sum(np.abs(y - yhat))`.
 - **Qué pasa**: `hard_yhat` no se usa. La función devuelve $1 - \text{media}|y - p|$, una "exactitud blanda" que
   depende de las probabilidades, no la fracción de aciertos.
 - **Cómo hacerlo**: `np.mean(hard_yhat == y)`, o `sklearn.metrics.accuracy_score`.
-
-<a id="p-2"></a>
-### P-2 · Reparto 80/20 sin barajar ni estratificar · `método` · por medir (4.4)
-
-- **Dónde**: `train_N = int(len(labels) * 0.8)`; `test_x = features[train_N:]`.
-- **Qué pasa**: el test son las últimas 296 filas del CSV: 27 no aprobadas (9.1 %), frente al 5.7 % del train.
-  Los pesos iniciales (`np.random.normal`) tampoco tienen semilla ([G-1](#g-1)).
-- **Cómo hacerlo**: `train_test_split(X, y, test_size=0.2, stratify=y, random_state=N)`, que baraja y conserva
-  la proporción de clases.

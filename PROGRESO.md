@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1, 2 y 3 completos. Capítulo 4 en curso (siguiente: 4.4)** · Actualizado: 2026-10-02
+Estado: **Capítulos 1, 2 y 3 completos. Capítulo 4 en curso (siguiente: 4.5)** · Actualizado: 2026-10-02
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -42,8 +42,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] Introducción (tipos de clasificación: binaria, multi-class, multi-label; dura vs blanda)
   - [x] 4.1 Data (ClinTox) y 4.2 Running This Notebook (imports, `mordredcommunity`, carga y exploración)
   - [x] 4.3 Molecular Descriptors (libro: 483 features + por qué se pierden 1130 + fuga al estandarizar + atajo en los descriptores)
-  - [ ] 4.4 Classification Models (perceptrón, sigmoide, entropía cruzada) ← siguiente
-  - [ ] 4.5 Classification Metrics (tipos de error, ROC, otras métricas)
+  - [x] 4.4 Classification Models (libro: perceptrón, sigmoide, entropía cruzada + listón + inorgánicos en el test + reparto estratificado + moléculas normalizadas)
+  - [ ] 4.5 Classification Metrics (tipos de error, ROC, otras métricas) ← siguiente
   - [ ] 4.6 Class Imbalance
   - [ ] 4.7 Overfitting · 4.8 Chapter Summary · 4.9 Exercises
 - [ ] 5. Kernel Learning
@@ -355,30 +355,59 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 
 ---
 
+### 2026-10-02 — Capítulo 4: 4.4 (modelos de clasificación)
+- Libro reproducido (con semilla `default_rng(0)`): perceptrón + MAE → **gradiente exactamente 0** (MAE de pesos
+  al azar 0.466). Sigmoide (derivada máx. 0.25, 4.5e-5 en x = 10), logits (proporción del train 0.9434 → logit
+  2.81; el libro empieza con b = 1), entropía cruzada (p = 0 cuesta 23.0 por el `1e-10`).
+- **Listón** = predecir la proporción del train: 0.217 en train, **0.315 en el test del libro** (27/296 no aprob.).
+  Pesos iniciales: 0.394. Entrenado como el libro (5 épocas, η = 0.2, 180 pasos): test 1.076 → mínima 0.369
+  (paso 154) → **final 0.479**, nunca bajo el listón; train 0.126. b final 3.52. Bucle: 36 de 37 batches
+  (filas 1152–1183 sin usar).
+- *Variante*: 4 inorgánicos aprobados (As₂O₃ 18.58, ²⁰¹TlCl 16.01, I₂ 7.77, SeS₂ 6.93) = **34.7 %** de la pérdida.
+  CSV casi alfabético por SMILES (93.0 %): 15 de las 22 moléculas sin carbono en el test. Coste medio aprobadas
+  0.335, no aprobadas 1.920.
+- *Variante* (5 repartos estratificados × 3 semillas, std del train, todos los batches): A libro 0.503, B libro con
+  std del train 0.500 (la fuga no es el problema), **C estratificado 0.170–0.230 frente a listón 0.238** (5 de 5).
+  Semilla ≤ 0.055 (libro) / < 0.02 (estratificado); reparto 0.06.
+- *Variante* moléculas normalizadas: **0.246** (por encima del listón en 4 de 5) frente a 0.199 originales; con las
+  477 columnas comunes 0.251 frente a 0.213. Las 6 del libro sin equivalente son aminas protonadas (`NsNH3`,
+  `NssNH2`, `NsssNH` + E-state): valen 0.014.
+- ERRATAS: P-2 → **4.4-a** (alto); nuevas 4.4-b (texto, alto: "well-trained" sin listón), 4.4-c (bug, bajo:
+  último batch), 4.4-d (texto, bajo: distancia ∝). Actualizadas G-1, 4.2-b, 4.3-b. README: fila del cap. 4 y
+  hallazgo 4.4.
+
+---
+
 ## Punto de partida de la próxima sesión
 
-**4.4 Classification Models** en `notebooks/04_clasificacion.ipynb`. Añadir celdas al final, tras `### Resumen de 4.3`
-(hoy la última, índice 35). Al ejecutarlo de arriba abajo, las cachés de Mordred ya existen y tarda poco.
+**4.5 Classification Metrics** en `notebooks/04_clasificacion.ipynb`. Añadir celdas al final, tras `### Resumen de 4.4`
+(hoy la última, índice 62). Ejecutar el notebook entero tarda ~30 s (cachés de Mordred en `data/`).
 
-**Qué hay en el libro** (`ml/classification.ipynb`, celdas 13–25; bajarlo de nuevo con
-`gh api repos/whitead/dmol-book/contents/ml/classification.ipynb -H "Accept: application/vnd.github.raw"` a la
-scratchpad, que no sobrevive entre sesiones): *Linear Perceptron*: `perceptron` con `jnp.where`, pérdida MAE y
-por qué su gradiente es 0 (función escalón); luego sigmoide + entropía cruzada y entrenamiento por batches
-(`batch_size = 32`, `train_N = int(len(labels) * 0.8)`, pesos `np.random.normal(scale=0.01)` sin semilla).
-La función `accuracy` (bug P-1) ya es de 4.5 (celda 27).
+**Qué hay en el libro** (`ml/classification.ipynb`, celdas 26–43; bajarlo a la scratchpad con
+`gh api repos/whitead/dmol-book/contents/ml/classification.ipynb -H "Accept: application/vnd.github.raw"`):
+`accuracy` (bug P-1: usa `yhat` en vez de `hard_yhat`), `alt_classifier` (todo 1, "mejor exactitud"),
+`error_types(y, yhat, threshold)` → (FP, FN); umbrales 0.5/0.7/0.9/0.95/0.99 (el texto dice "1 falso positivo a costa
+de perder 218", cifras de su ejecución); curva ROC a mano con los umbrales únicos (**ojo: reasigna `idx`, `fp`, `tp`,
+que en nuestro notebook ya existen; `idx` es `np.arange(len(y))`**); *Other metrics*: precision/recall, solo texto.
+Aquí el libro trata FP (aprobar uno que fracasa) como el error peor. Ojo: la clase positiva es "aprobado".
 
-**Variables del notebook que usará 4.4**: `features` (483 columnas estandarizadas como el libro), `labels`
-(Series, 1 = aprobado), `y` (array), `raw_features` (1613 sin estandarizar), `raw_norm` / `features_norm`
-(moléculas normalizadas, 1613 / 541 columnas), `valid_mols`, `norm_mols`, `data` (smiles, FDA_APPROVED, MolWt...).
+**Variables disponibles tras 4.4**: `w`, `b` (modelo del libro ya entrenado, reparto del libro), `test_x`, `test_y`,
+`train_x`, `train_y`, `p_train`, `baseline_test`; `bin_classifier`, `cross_ent`, `loss_wrapper`, `loss_grad`;
+`entrenar(X_tr, y_tr, X_te, y_te, seed)` → `(w, b, curva_test)`; `estandarizar_con_train(R, idx_tr, idx_te)` →
+`(X_tr, X_te, n_cols)`; `liston(y_tr, y_te)`; `X483`, `X541`, `comunes` (477); `y` (= `labels.values`, restaurado);
+`train_test_split` y `roc_auc_score` importados. Repartos estratificados: `train_test_split(idx, test_size=0.2,
+stratify=y, random_state=r)`, r = 0–4.
 
-**Cosas a medir en 4.4** (y luego pasarlas de *Pendientes* a su capítulo en `ERRATAS.md` / `ERRATA.md`):
-- P-2: reparto 80/20 sin barajar (test 27/296 = 9.1 % negativos frente a 5.7 % en train). Reproducir el del libro
-  y luego *variante*: `train_test_split(stratify=y, random_state=4)`.
-- Semilla en los pesos iniciales (G-1). Estandarizar solo con train (4.3-b; quitar las 10 columnas constantes).
-- *Variante* del atajo: mismo clasificador con `raw_norm`. Avance de borrador (sklearn, regresión logística,
-  5-fold estratificado): AUC ≈ 0.84 originales frente a 0.68–0.75 normalizadas. El AUC llega en 4.5: en 4.4
-  quizá solo exactitud/pérdida, y dejar la comparación completa para 4.5.
+**Cosas a medir en 4.5**:
+- P-1: exactitud del libro (blanda) frente a la real. Borrador (modelo del libro, semilla 0): **0.827** blanda,
+  **0.875** real; `alt_classifier` 0.909 (269/296). La conclusión del libro (el trivial gana en exactitud) se
+  mantiene. Pasar P-1 a 4.5-x en ERRATAS/ERRATA.
+- AUC: borrador, modelo del libro en su reparto 0.724; estratificados 0.75–0.89 según el reparto (0.80, 0.81, 0.83,
+  0.89, 0.76). sklearn `LogisticRegression` con L2 (C = 0.01) en el reparto 4: entropía cruzada 0.179, AUC 0.844
+  (anticipo de 4.7). *Variante* pendiente: AUC originales frente a normalizadas (borrador de 4.3 con LR 5-fold:
+  ≈ 0.84 frente a 0.68–0.75).
+- Las cifras de los umbrales del libro (FP/FN) con nuestro modelo, y con qué umbral se llega a 1 FP.
 
-**Flujo** (ver memoria *flujo-notebooks-dmol*): script de fase 1 con código + marcadores `<<INTERP_...>>`, ejecutar
-con `jupyter nbconvert --execute --inplace` desde `notebooks/`, leer salidas, fase 2 con el texto. Después:
-PROGRESO, ERRATAS/ERRATA, README (fila del cap. 4), commit + push, y dejar este apartado listo para el siguiente.
+**Flujo** (memoria *flujo-notebooks-dmol*): script de fase 1 con código + marcadores `<<INTERP_...>>`, ejecutar con
+`jupyter nbconvert --to notebook --execute --inplace` desde `notebooks/`, leer salidas, fase 2 con el texto. Después:
+PROGRESO, ERRATAS/ERRATA, README, commit + push, y dejar este apartado listo para 4.6.
