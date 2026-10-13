@@ -50,7 +50,11 @@ repository (`github.com/whitead/dmol-book`, folder `ml/`), which includes the ce
 | [4.4-b](#44-b) | 4.4 | `text` | high | calls the model well trained without comparing it to a baseline |
 | [4.4-c](#44-c) | 4.4 | `bug` | low | the loop skips the last training batch |
 | [4.4-d](#44-d) | 4.4 | `text` | low | $\vec w\cdot\vec x + b$ is proportional to the distance to the boundary, not the distance |
-| [P-1](#p-1) | 4.5 | `bug` | ? | `accuracy` uses `yhat` instead of `hard_yhat` |
+| [4.5-a](#45-a) | 4.5 | `bug` | low | `accuracy` uses `yhat` instead of `hard_yhat`: it computes $1 - \text{MAE}$ |
+| [4.5-b](#45-b) | 4.5 | `bug` | low | the ROC curve keeps an arbitrary TPR for each FPR |
+| [4.5-c](#45-c) | 4.5 | `text` | low | defines recall as the number of predicted positives |
+| [4.5-d](#45-d) | 4.5 | `method` | low | picks the threshold by looking at the test set |
+| [4.5-e](#45-e) | 4.5 | `text` | low | "being able to tune the threshold" as proof of a good model |
 
 ---
 
@@ -310,10 +314,12 @@ repository (`github.com/whitead/dmol-book`, folder `ml/`), which includes the ce
   14 salts. In the 4.4 classifier (5 stratified splits), the test loss is 0.199 with the original molecules
   and **0.246** with the normalized ones, against a baseline of 0.238: **without the shortcut, the model does
   not beat the constant model**. The 6 protonated-amine columns (`NsNH3`, `SsssNH`...) alone account for 0.014
-  of the advantage. AUC will be measured in 4.5.
+  of the advantage. With AUC (4.5), which only measures ranking, the normalized molecules do carry some signal (**0.734** vs
+  0.5), but the shortcut is worth ≈ 0.09 (0.827 with the original molecules, better in all 5 splits), and a
+  rule that only reads the SMILES text reaches **0.920**, higher than any trained model.
 - **How to do it**: normalize molecules before computing descriptors (`rdMolStandardize`:
   `LargestFragmentChooser` + `Uncharger`) and check that the model does not learn the source.
-- **In our notebooks**: `04_clasificacion.ipynb`, 4.2 and 4.3.
+- **In our notebooks**: `04_clasificacion.ipynb`, 4.2, 4.3, 4.4 and 4.5.
 
 <a id="43-a"></a>
 ### 4.3-a · The `NaN`s do not come from std = 0 · `text` · medium
@@ -392,15 +398,75 @@ repository (`github.com/whitead/dmol-book`, folder `ml/`), which includes the ce
   "distance". The "confidence" idea still holds.
 - **In our notebooks**: `04_clasificacion.ipynb`, 4.4.
 
+<a id="45-a"></a>
+### 4.5-a · `accuracy` uses `yhat` instead of `hard_yhat` · `bug` · low
+
+- **Where**: 4.5, `def accuracy(y, yhat)`: computes `hard_yhat = np.where(yhat > 0.5, ...)` and then uses
+  `np.sum(np.abs(y - yhat))`.
+- **What happens**: `hard_yhat` is never used. The function returns $1 - \text{mean}|y - p|$, one minus the mean
+  absolute error of the probabilities, not the fraction of correct predictions.
+- **Effect**: with the book's model, **0.827** instead of the real accuracy, **0.875** (259 of 296). The book's
+  conclusion (the classifier that always says "approved" has higher accuracy, 0.909) still holds.
+- **How to do it**: `np.mean(hard_yhat == y)`, or `sklearn.metrics.accuracy_score`.
+- **In our notebooks**: `04_clasificacion.ipynb`, 4.5.
+
+<a id="45-b"></a>
+### 4.5-b · The ROC curve keeps an arbitrary TPR for each FPR · `bug` · low
+
+- **Where**: 4.5, *Receiver-Operating Characteristic Curve*: `idx = np.argsort(fp)` and the
+  `# now remove duplicate x-values` loop, which keeps the first point of each FPR.
+- **What happens**: several thresholds give the same FPR with different TPR (the vertical part of each step).
+  `np.argsort` does not guarantee the order of ties, so the kept point is not necessarily the one with the highest
+  TPR. The remaining points are joined with straight lines: the figure cuts the corners of the steps.
+- **Effect**: in 14 of the 28 FP values the maximum TPR is not kept. At 0 FP it keeps TPR = 0 instead of 0.164
+  (the 44 approved drugs at threshold 0.99), so the figure does not show the very point the text talks about. The
+  area barely changes: 0.727 vs 0.724 from `roc_auc_score`.
+- **How to do it**: `sklearn.metrics.roc_curve` (and `roc_auc_score` for the area, which the book does not
+  compute), or keep the maximum TPR for each FPR.
+- **In our notebooks**: `04_clasificacion.ipynb`, 4.5.
+
+<a id="45-c"></a>
+### 4.5-c · Defines recall as the number of predicted positives · `text` · low
+
+- **Where**: 4.5, *Other metrics*: "recall measures number of predicted positives" and "Recall here meaning you do
+  not return very many molecules".
+- **What happens**: recall is $\text{TP}/(\text{TP}+\text{FN})$, the fraction of actual positives the model
+  finds. Returning few molecules usually lowers it, but that is not its definition.
+- **Effect**: with the book's model at threshold 0.5, recall is 0.937 for "approved" and 0.259 for "not approved"
+  (it finds 7 of the 27 toxic drugs in the test set).
+- **In our notebooks**: `04_clasificacion.ipynb`, 4.5.
+
+<a id="45-d"></a>
+### 4.5-d · Picks the threshold by looking at the test set · `method` · low
+
+- **Where**: 4.5, *Error Types*: tries thresholds on `test_y` and concludes "We're able to have 1 false
+  positives in fact, at the cost of missing 218 of the molecules".
+- **What happens**: the threshold is a hyperparameter; tuning it on the test set makes the test figure an
+  optimistic estimate (like choosing $\lambda$ on the test set in chapter 3). Also, with 27 non-approved drugs in
+  the test set, each false positive is 3.7 % of them.
+- **Effect**: chosen on the test set (just above the worst non-approved drug, p = 0.9898): 0 FP and 44 approved
+  drugs recognized. Chosen on the training set for 0 FP: also 0 FP on the test set, but 25 approved drugs. Chosen
+  on the training set for 1 FP: 3 FP on the test set. The idea survives; the figures look better than they would
+  on new molecules.
+- **How to do it**: choose the threshold on a validation set (or by cross-validation within the training set)
+  and look at the test set only once.
+- **In our notebooks**: `04_clasificacion.ipynb`, 4.5.
+
+<a id="45-e"></a>
+### 4.5-e · "Being able to tune the threshold" as proof of a good model · `text` · low
+
+- **Where**: 4.5, *Error Types*: "A model that is capable of this tuning is an example of a good model. Our other
+  model, that predicts 1s, has good accuracy but we cannot adjust it".
+- **What happens**: any model that outputs probabilities can be tuned, even one that outputs them at random (with
+  a high enough threshold it has no false positives either). What makes a model good is how much it loses when
+  tuned: its ROC curve lying above the diagonal.
+- **Effect**: the book's model has AUC **0.724** on its test set (0.932 on train); picking 44 positives at random
+  would include about 4 non-approved drugs, and the model gets 0. It is better than chance, but that is what the AUC
+  says, not the ability to move the threshold.
+- **In our notebooks**: `04_clasificacion.ipynb`, 4.5.
+
 ## To be checked
 
 Seen in the book's code, but their effect has not yet been measured in our notebooks.
 
-<a id="p-1"></a>
-### P-1 · `accuracy` uses `yhat` instead of `hard_yhat` · `bug` · to be measured (4.5)
-
-- **Where**: `def accuracy(y, yhat)`: computes `hard_yhat = np.where(yhat > 0.5, ...)` and then uses
-  `np.sum(np.abs(y - yhat))`.
-- **What happens**: `hard_yhat` is never used. The function returns $1 - \text{mean}|y - p|$, a "soft accuracy"
-  that depends on the probabilities, not the fraction of correct predictions.
-- **How to do it**: `np.mean(hard_yhat == y)`, or `sklearn.metrics.accuracy_score`.
+*None at the moment.*

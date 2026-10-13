@@ -73,6 +73,11 @@ compounds.* Scientific Data **2019**, 6, 143. <https://doi.org/10.1038/s41597-01
     text calls it well trained. With a stratified random split it does beat it, narrowly, but only
     thanks to the SMILES-format shortcut: on normalized molecules it stays at the baseline (0.246 vs
     0.238).
+  - **4.5** — the `accuracy` function ignores its own hard predictions (0.827 instead of 0.875).
+    Measured with ROC AUC, which the book recommends but never computes, the model trained on
+    normalized molecules does carry some signal (0.73 vs 0.5) that the loss could not show; the
+    format shortcut is worth about 0.09 of AUC, and a rule that only reads the SMILES text (0.92)
+    beats every trained model.
 - **Exercises solved with extra analysis.** For example, chapter 3's "best linear model": ridge on
   204 RDKit descriptors clipped to the training range plus Morgan count fingerprints reaches MSE
   1.87 in nested cross-validation (vs 2.79 for the book's model) and 4.13 on a scaffold split (vs
@@ -90,7 +95,7 @@ compounds.* Scientific Data **2019**, 6, 143. <https://doi.org/10.1038/s41597-01
 | 1. Tensors and Shapes | [`01_tensores.ipynb`](notebooks/01_tensores.ipynb) | ✅ |
 | 2. Introduction to Machine Learning | [`02_introduccion.ipynb`](notebooks/02_introduccion.ipynb) · [exercises solved](notebooks/02_ejercicios_resueltos.ipynb) | ✅ |
 | 3. Regression & Model Assessment | [`03_regresion.ipynb`](notebooks/03_regresion.ipynb) · [exercises solved](notebooks/03_ejercicios_resueltos.ipynb) | ✅ |
-| 4. Classification | [`04_clasificacion.ipynb`](notebooks/04_clasificacion.ipynb) | in progress (4.1–4.4) |
+| 4. Classification | [`04_clasificacion.ipynb`](notebooks/04_clasificacion.ipynb) | in progress (4.1–4.5) |
 | 5–22 | — | to do |
 
 - **[SUMMARIES.md](SUMMARIES.md)** — the core lessons of each finished chapter, in English, on one

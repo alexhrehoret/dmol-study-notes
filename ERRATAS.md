@@ -50,7 +50,11 @@ fuente (`github.com/whitead/dmol-book`, carpeta `ml/`), que incluye las celdas o
 | [4.4-b](#44-b) | 4.4 | `texto` | alto | da el modelo por bien entrenado sin compararlo con un listón |
 | [4.4-c](#44-c) | 4.4 | `bug` | bajo | el bucle se salta el último batch del train |
 | [4.4-d](#44-d) | 4.4 | `texto` | bajo | $\vec w\cdot\vec x + b$ es proporcional a la distancia a la frontera, no la distancia |
-| [P-1](#p-1) | 4.5 | `bug` | ? | `accuracy` usa `yhat` en vez de `hard_yhat` |
+| [4.5-a](#45-a) | 4.5 | `bug` | bajo | `accuracy` usa `yhat` en vez de `hard_yhat`: calcula $1 - \text{MAE}$ |
+| [4.5-b](#45-b) | 4.5 | `bug` | bajo | la curva ROC se queda con una TPR cualquiera de cada FPR |
+| [4.5-c](#45-c) | 4.5 | `texto` | bajo | define el recall como el número de positivos predichos |
+| [4.5-d](#45-d) | 4.5 | `método` | bajo | elige el umbral mirando el test |
+| [4.5-e](#45-e) | 4.5 | `texto` | bajo | "poder ajustar el umbral" como prueba de un buen modelo |
 
 ---
 
@@ -312,10 +316,12 @@ fuente (`github.com/whitead/dmol-book`, carpeta `ml/`), que incluye las celdas o
   En el clasificador de 4.4 (5 repartos estratificados), la pérdida de test es 0.199 con las moléculas
   originales y **0.246** con las normalizadas, frente a un listón de 0.238: **sin el atajo, el modelo no supera
   al modelo constante**. Las 6 columnas de aminas protonadas (`NsNH3`, `SsssNH`...) aportan solas 0.014 de la
-  ventaja. El AUC se medirá en 4.5.
+  ventaja. Con el AUC (4.5), que solo mide el orden, las normalizadas sí tienen algo de señal (**0.734** frente a 0.5),
+  pero el atajo vale ≈ 0.09 (0.827 con las originales, que ganan en los 5 repartos), y una regla que solo lee
+  el texto del SMILES llega a **0.920**, más que cualquier modelo entrenado.
 - **Cómo hacerlo**: normalizar las moléculas antes de calcular descriptores (`rdMolStandardize`:
   `LargestFragmentChooser` + `Uncharger`) y comprobar que el modelo no aprende la fuente.
-- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.2 y 4.3.
+- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.2, 4.3, 4.4 y 4.5.
 
 <a id="43-a"></a>
 ### 4.3-a · Los `NaN` no vienen de std = 0 · `texto` · medio
@@ -394,15 +400,74 @@ fuente (`github.com/whitead/dmol-book`, carpeta `ml/`), que incluye las celdas o
   "distancia" sale el doble. La idea de "confianza" no cambia.
 - **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.4.
 
+<a id="45-a"></a>
+### 4.5-a · `accuracy` usa `yhat` en vez de `hard_yhat` · `bug` · bajo
+
+- **Dónde**: 4.5, `def accuracy(y, yhat)`: calcula `hard_yhat = np.where(yhat > 0.5, ...)` y luego usa
+  `np.sum(np.abs(y - yhat))`.
+- **Qué pasa**: `hard_yhat` no se usa. La función devuelve $1 - \text{media}|y - p|$, uno menos el error absoluto
+  medio de las probabilidades, no la fracción de aciertos.
+- **Efecto**: con el modelo del libro, **0.827** en vez de la exactitud real, **0.875** (259 de 296). La
+  conclusión del libro (el clasificador que dice siempre "aprobado" tiene más exactitud, 0.909) se mantiene.
+- **Cómo hacerlo**: `np.mean(hard_yhat == y)`, o `sklearn.metrics.accuracy_score`.
+- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.5.
+
+<a id="45-b"></a>
+### 4.5-b · La curva ROC se queda con una TPR cualquiera de cada FPR · `bug` · bajo
+
+- **Dónde**: 4.5, *Receiver-Operating Characteristic Curve*: `idx = np.argsort(fp)` y el bucle
+  `# now remove duplicate x-values`, que guarda el primer punto de cada FPR.
+- **Qué pasa**: varios umbrales dan la misma FPR con distinta TPR (el tramo vertical de cada escalón).
+  `np.argsort` no garantiza en qué orden quedan los empates, así que el punto guardado no es necesariamente el de
+  TPR más alta. Los puntos que quedan se unen con rectas: la figura corta las esquinas de los escalones.
+- **Efecto**: en 14 de los 28 valores de FP no se guarda la TPR máxima. Con 0 FP guarda TPR = 0 en vez de 0.164
+  (las 44 aprobadas del umbral 0.99), así que la figura no enseña el punto del que habla el texto. El área casi no
+  cambia: 0.727 frente a 0.724 de `roc_auc_score`.
+- **Cómo hacerlo**: `sklearn.metrics.roc_curve` (y `roc_auc_score` para el área, que el libro no calcula), o
+  quedarse con la TPR máxima de cada FPR.
+- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.5.
+
+<a id="45-c"></a>
+### 4.5-c · Define el recall como el número de positivos predichos · `texto` · bajo
+
+- **Dónde**: 4.5, *Other metrics*: "recall measures number of predicted positives" y "Recall here meaning you do
+  not return very many molecules".
+- **Qué pasa**: el recall es $\text{TP}/(\text{TP}+\text{FN})$, la fracción de los positivos reales que el modelo
+  encuentra. Devolver pocas moléculas suele bajarlo, pero no es su definición.
+- **Efecto**: con el modelo del libro y umbral 0.5, recall 0.937 para "aprobado" y 0.259 para "no aprobado"
+  (encuentra 7 de las 27 tóxicas del test).
+- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.5.
+
+<a id="45-d"></a>
+### 4.5-d · Elige el umbral mirando el test · `método` · bajo
+
+- **Dónde**: 4.5, *Error Types*: prueba umbrales sobre `test_y` y concluye "We're able to have 1 false positives
+  in fact, at the cost of missing 218 of the molecules".
+- **Qué pasa**: el umbral es un hiperparámetro; si se ajusta con el test, la cifra del test deja de ser una
+  estimación honesta (como elegir $\lambda$ con el test en el capítulo 3). Además, con 27 no aprobadas en el test
+  cada falso positivo es un 3.7 % de ellas.
+- **Efecto**: elegido en el test (justo encima de la peor no aprobada, p = 0.9898): 0 FP y 44 aprobadas
+  reconocidas. Elegido en el train para 0 FP: también 0 FP en el test, pero 25 aprobadas. Elegido en el train
+  para 1 FP: 3 FP en el test. La idea sobrevive; las cifras salen mejores de lo que serían con moléculas nuevas.
+- **Cómo hacerlo**: elegir el umbral con una validación (o validación cruzada dentro del train) y mirar el
+  test una sola vez.
+- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.5.
+
+<a id="45-e"></a>
+### 4.5-e · "Poder ajustar el umbral" como prueba de un buen modelo · `texto` · bajo
+
+- **Dónde**: 4.5, *Error Types*: "A model that is capable of this tuning is an example of a good model. Our other
+  model, that predicts 1s, has good accuracy but we cannot adjust it".
+- **Qué pasa**: cualquier modelo que dé probabilidades se puede ajustar, incluso uno que las dé al azar (con un
+  umbral alto tampoco tiene falsos positivos). Lo que hace bueno a un modelo es cuánto pierde al ajustarlo: que su
+  curva ROC quede por encima de la diagonal.
+- **Efecto**: el modelo del libro tiene AUC **0.724** en su test (0.932 en train); con 44 positivos elegidos al
+  azar se esperarían unas 4 no aprobadas, y el modelo saca 0. Es mejor que el azar, pero eso lo dice el AUC, no la
+  posibilidad de mover el umbral.
+- **En nuestros notebooks**: `04_clasificacion.ipynb`, 4.5.
+
 ## Pendientes de comprobar
 
 Vistos en el código del libro, pero aún sin medir su efecto en nuestros notebooks.
 
-<a id="p-1"></a>
-### P-1 · `accuracy` usa `yhat` en vez de `hard_yhat` · `bug` · por medir (4.5)
-
-- **Dónde**: `def accuracy(y, yhat)`: calcula `hard_yhat = np.where(yhat > 0.5, ...)` y luego usa
-  `np.sum(np.abs(y - yhat))`.
-- **Qué pasa**: `hard_yhat` no se usa. La función devuelve $1 - \text{media}|y - p|$, una "exactitud blanda" que
-  depende de las probabilidades, no la fracción de aciertos.
-- **Cómo hacerlo**: `np.mean(hard_yhat == y)`, o `sklearn.metrics.accuracy_score`.
+*Ninguna por ahora.*

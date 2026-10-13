@@ -1,6 +1,6 @@
 # Progreso — Deep Learning for Molecules and Materials (dmol.pub)
 
-Estado: **Capítulos 1, 2 y 3 completos. Capítulo 4 en curso (siguiente: 4.5)** · Actualizado: 2026-10-02
+Estado: **Capítulos 1, 2 y 3 completos. Capítulo 4 en curso (siguiente: 4.6)** · Actualizado: 2026-10-13
 
 Marca `[x]` cuando una sección esté hecha y entendida.
 
@@ -43,8 +43,8 @@ Marca `[x]` cuando una sección esté hecha y entendida.
   - [x] 4.1 Data (ClinTox) y 4.2 Running This Notebook (imports, `mordredcommunity`, carga y exploración)
   - [x] 4.3 Molecular Descriptors (libro: 483 features + por qué se pierden 1130 + fuga al estandarizar + atajo en los descriptores)
   - [x] 4.4 Classification Models (libro: perceptrón, sigmoide, entropía cruzada + listón + inorgánicos en el test + reparto estratificado + moléculas normalizadas)
-  - [ ] 4.5 Classification Metrics (tipos de error, ROC, otras métricas) ← siguiente
-  - [ ] 4.6 Class Imbalance
+  - [x] 4.5 Classification Metrics (libro: exactitud, tipos de error, umbrales, ROC + AUC, precisión/recall + umbral sin mirar el test + AUC originales vs normalizadas)
+  - [ ] 4.6 Class Imbalance ← siguiente
   - [ ] 4.7 Overfitting · 4.8 Chapter Summary · 4.9 Exercises
 - [ ] 5. Kernel Learning
 
@@ -378,36 +378,68 @@ En `notebooks/02_ejercicios_resueltos.ipynb` (autocontenido). Hallazgos:
 
 ---
 
+### 2026-10-13 — Capítulo 4: 4.5 (métricas de clasificación)
+- Libro reproducido (modelo de 4.4, semilla 0, reparto del libro): `accuracy` del libro **0.827** (= 1 − MAE de
+  las probabilidades) frente a la exactitud real **0.875** (259/296); `alt_classifier` 0.909. Errores con umbral
+  0.5: alt (27 FP, 0 FN), modelo (20, 17). Umbrales 0.7/0.9/0.95/0.99/0.999 → FP 18/10/5/0/0, FN 25/82/120/225/263.
+  Con 0.99: **0 FP y 44 TP** (el libro, con su ejecución, 1 FP y 218 perdidas). Peor no aprobada p = 0.9898.
+- ROC del libro: 288 probabilidades distintas + 2 extremos → 28 puntos (FPR a saltos de 1/27). **AUC 0.724**
+  (`roc_auc_score` = parejas, 7263); trapecios sobre los puntos del libro 0.727. Su deduplicado no guarda la TPR
+  máxima en 14 de 28 FP; con FP = 0 guarda 0 en vez de 0.164. alt AUC 0.500; train **0.932**; sin los 15
+  inorgánicos 0.741 (en el AUC pesan poco: una aprobada mal ordenada cuesta ≤ 1/269).
+- Precisión/recall (umbral 0.5): "aprobado" 0.926/0.937 (F1 0.932; alt 0.909/1, F1 **0.952**); "no aprobado"
+  **0.292/0.259** (7 de 27). Con 0.99: aprobado 1.000/0.164; no aprobado 0.107/1.000.
+- *Variante* umbral elegido en el train: 0 FP en train (0.9942) → test 0 FP, **25 TP** (vs 44 eligiéndolo en el
+  test); 1 FP en train (0.9818) → test 3 FP, 76 TP.
+- *Variante* AUC (5 repartos estratificados × 3 semillas, `entrenar` de 4.4): originales **0.827**, normalizadas
+  **0.734** (originales ganan en 5/5), comunes 0.783 / 0.718; train 0.936 / 0.879. Exactitud 0.943 / 0.929 frente a
+  listón 0.936. Pérdida − listón −0.040 / +0.008. **Regla de formato de 4.1: AUC 0.920** (0.896–0.933), exactitud
+  0.868. Semilla ≤ 0.04 de AUC; reparto 0.739–0.896. Moraleja: la pérdida decía "sin señal" para las normalizadas;
+  el AUC dice que ordenan mejor que el azar.
+- Nota técnica: `jax.jit` sobre `loss_grad` dio `NaN` en un borrador (sin investigar); en el notebook no se usa.
+- ERRATAS: P-1 → **4.5-a**; nuevas 4.5-b (bug: deduplicado ROC), 4.5-c (texto: recall), 4.5-d (método: umbral
+  con el test), 4.5-e (texto: "ajustable = bueno"), todas bajo. Pendientes: ninguna. 4.2-b con el AUC. README:
+  fila del cap. 4 y hallazgo 4.5. Figuras `04_roc_libro.png`, `04_roc_auc.png`, `04_auc_atajo.png`.
+
+---
+
 ## Punto de partida de la próxima sesión
 
-**4.5 Classification Metrics** en `notebooks/04_clasificacion.ipynb`. Añadir celdas al final, tras `### Resumen de 4.4`
-(hoy la última, índice 62). Ejecutar el notebook entero tarda ~30 s (cachés de Mordred en `data/`).
+**4.6 Class Imbalance** en `notebooks/04_clasificacion.ipynb`. Añadir celdas al final, tras `### Resumen de 4.5`
+(hoy la última, índice 90). Ejecutar el notebook entero tarda ~60 s (cachés de Mordred en `data/`).
 
-**Qué hay en el libro** (`ml/classification.ipynb`, celdas 26–43; bajarlo a la scratchpad con
+**Qué hay en el libro** (`ml/classification.ipynb`, celdas 44–48; bajarlo a la scratchpad con
 `gh api repos/whitead/dmol-book/contents/ml/classification.ipynb -H "Accept: application/vnd.github.raw"`):
-`accuracy` (bug P-1: usa `yhat` en vez de `hard_yhat`), `alt_classifier` (todo 1, "mejor exactitud"),
-`error_types(y, yhat, threshold)` → (FP, FN); umbrales 0.5/0.7/0.9/0.95/0.99 (el texto dice "1 falso positivo a costa
-de perder 218", cifras de su ejecución); curva ROC a mano con los umbrales únicos (**ojo: reasigna `idx`, `fp`, `tp`,
-que en nuestro notebook ya existen; `idx` es `np.arange(len(y))`**); *Other metrics*: precision/recall, solo texto.
-Aquí el libro trata FP (aprobar uno que fracasa) como el error peor. Ojo: la clase positiva es "aprobado".
+texto sobre desequilibrio (¿es un problema? solo si hay *label shift*; sobremuestrear/submuestrear, SMOTE; o pesar
+la pérdida). Código (celda 45): `weighted_cross_ent(y, yhat, yw)` = suma ponderada / `sum(yw)`; **redefine
+`bin_classifier`, `loss_wrapper(w, b, x, y, yw)` y `loss_grad`** (ojo: nuestras `entrenar` y `liston` llaman a
+`loss_wrapper`/`loss_grad` con 4 argumentos, así que hay que renombrar las del libro o restaurar las nuestras
+después); pesos ×1000 para la clase 0 y renormalizados a media 1; `w2 = np.random.normal(scale=0.01)` sin
+semilla, `b2 = 1.0`; **10 épocas**, η = 0.2, mismo bucle (36 batches); test con pesos 1. Imprime `error_types`
+del modelo normal y del ponderado con umbral 0.5. Celda 47: ROC de los dos (reasigna `idx`, `fp`, `tp`,
+`fpr`, `tpr`: restaurar `idx = np.arange(len(y))`; usa `fpr_nd`/`tpr_nd` del modelo normal, que siguen
+existiendo). Celda 48: concluye que ponderar no mejora salvo en FPR 0.25–0.4 y es peor a FPR baja; cita a "Bryrd"
+(es Byrd) and Lipton; *Screening: no negative examples* (positive-unlabeled learning), solo texto.
 
-**Variables disponibles tras 4.4**: `w`, `b` (modelo del libro ya entrenado, reparto del libro), `test_x`, `test_y`,
-`train_x`, `train_y`, `p_train`, `baseline_test`; `bin_classifier`, `cross_ent`, `loss_wrapper`, `loss_grad`;
-`entrenar(X_tr, y_tr, X_te, y_te, seed)` → `(w, b, curva_test)`; `estandarizar_con_train(R, idx_tr, idx_te)` →
-`(X_tr, X_te, n_cols)`; `liston(y_tr, y_te)`; `X483`, `X541`, `comunes` (477); `y` (= `labels.values`, restaurado);
-`train_test_split` y `roc_auc_score` importados. Repartos estratificados: `train_test_split(idx, test_size=0.2,
-stratify=y, random_state=r)`, r = 0–4.
+**Variables disponibles tras 4.5**: todo lo de 4.4 (`w`, `b`, `test_x`, `test_y`, `train_x`, `train_y`,
+`p_train`, `baseline_test`, `bin_classifier`, `cross_ent`, `loss_wrapper`, `loss_grad`, `entrenar(X_tr, y_tr,
+X_te, y_te, seed)` → `(w, b, curva_test)`, `estandarizar_con_train`, `liston`, `X483`, `X541`, `comunes`, `y`,
+`idx`, `train_test_split`, `roc_auc_score`) y de 4.5: `p_test`, `exactitud(y, yhat, umbral=0.5)`, `accuracy`
+(la del libro, con el bug), `alt_classifier`, `error_types`, `total_pos` (269), `total_neg` (27), `fpr_nd`,
+`tpr_nd`, `auc_test` (0.724), `roc_curve`, `confusion_matrix`, `precision_score`, `recall_score`, `f1_score`,
+`p_train_modelo`, `regla_texto`, `res_auc` (tabla de la variante AUC).
 
-**Cosas a medir en 4.5**:
-- P-1: exactitud del libro (blanda) frente a la real. Borrador (modelo del libro, semilla 0): **0.827** blanda,
-  **0.875** real; `alt_classifier` 0.909 (269/296). La conclusión del libro (el trivial gana en exactitud) se
-  mantiene. Pasar P-1 a 4.5-x en ERRATAS/ERRATA.
-- AUC: borrador, modelo del libro en su reparto 0.724; estratificados 0.75–0.89 según el reparto (0.80, 0.81, 0.83,
-  0.89, 0.76). sklearn `LogisticRegression` con L2 (C = 0.01) en el reparto 4: entropía cruzada 0.179, AUC 0.844
-  (anticipo de 4.7). *Variante* pendiente: AUC originales frente a normalizadas (borrador de 4.3 con LR 5-fold:
-  ≈ 0.84 frente a 0.68–0.75).
-- Las cifras de los umbrales del libro (FP/FN) con nuestro modelo, y con qué umbral se llega a 1 FP.
+**Cosas a medir en 4.6**:
+- El modelo ponderado del libro (con semilla): FP/FN a 0.5, ROC y **AUC** frente al normal (0.724). ¿Se sostiene
+  "no mejora"? Peso efectivo tras renormalizar: clase 0 ≈ 15.5, clase 1 ≈ 0.016 (calcularlo en el notebook).
+- *Variante* posible: pesos "balanceados" (N / (2 N_c), lo que hace `class_weight="balanced"`) en vez de ×1000,
+  sobre los 5 repartos estratificados, midiendo AUC y pérdida sin ponderar; ¿cambia el AUC o solo desplaza el
+  umbral? (idea a comprobar: el ponderado cambia sobre todo el sesgo $b$, que no afecta al AUC).
+- Erratas candidatas (verificar): "Bryrd" (texto, bajo); que la pérdida de test del ponderado se mida sin pesos
+  (¿coherente?).
 
 **Flujo** (memoria *flujo-notebooks-dmol*): script de fase 1 con código + marcadores `<<INTERP_...>>`, ejecutar con
-`jupyter nbconvert --to notebook --execute --inplace` desde `notebooks/`, leer salidas, fase 2 con el texto. Después:
-PROGRESO, ERRATAS/ERRATA, README, commit + push, y dejar este apartado listo para 4.6.
+`jupyter nbconvert --to notebook --execute --inplace` desde `notebooks/`, leer salidas, fase 2 con el texto. Para
+explorar rápido: `jupyter nbconvert --to script` del notebook, añadir un `pickle.dump` del estado al final y
+ejecutarlo una vez (~40 s). Después: PROGRESO, ERRATAS/ERRATA, README, commit + push, y dejar este apartado listo
+para 4.7.
